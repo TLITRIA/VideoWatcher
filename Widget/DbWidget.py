@@ -1,0 +1,79 @@
+from UI.dbViewForm import Ui_Form
+import pandas as pd
+from PyQt6.QtWidgets import QWidget
+from PyQt6.QtGui import QIcon, QCursor
+from PyQt6.QtCore import pyqtSignal, Qt, QStringListModel
+
+from Web.MyWebDriver import *
+from Common.FlowLayout import FlowLayout
+from DataAccess.sql_query import *
+from Widget.InfoWidget import InfoWidget
+
+
+class DbWidget(QWidget, Ui_Form):
+    __df: pd.DataFrame
+    __db = DataBase()
+    wd = MyWebDriver()
+    flow_layout: FlowLayout
+    s_clear_flowlayout = pyqtSignal()
+
+    def on_click_bili_taged_video(self):
+        self.FlowlayoutClear()
+        df = get_all_taged_video_df(self.__db)
+        self.AddInfoWidgets(df)
+
+    def on_click_bili_up_exclude(self):
+        self.FlowlayoutClear()
+
+    def on_click_bili_up(self):
+        self.FlowlayoutClear()
+        df = get_all_up_df(self.__db)
+        self.AddInfoWidgets(df)
+
+    def __init__(self, parent=None):
+        super(DbWidget, self).__init__()
+        self.setupUi(self)
+
+        self.scrollArea.setWidgetResizable(True)
+        container = QWidget()
+        self.flow_layout = FlowLayout(container, margin=10, spacing=10)
+        self.scrollArea.setWidget(container)
+        
+        self.update_playlist_number()
+
+    def AddInfoWidgets(self, df: pd.DataFrame, dialog=None):
+        for i in range(len(df)):
+            # tmp_df = df.iloc[i:i+1, :]
+            w = InfoWidget(self)
+            w.series_update_all(df.iloc[i])
+            w.setFixedSize(260, 155)
+            self.flow_layout.addWidget(w)
+
+            w.s_toolbar.connect(lambda w: print("toolbar"))
+            w.s_goto_videopage.connect(
+                lambda url: self.wd.Goto(url) if url else None
+            )
+            w.s_goto_upspace.connect(
+                lambda url: self.wd.Goto(url) if url else None
+            )
+            w.s_del_infoW.connect(self.removeFlowLayout)
+        self.update_playlist_number()
+
+    def FlowlayoutClear(self):
+        while self.flow_layout.count():
+            item = self.flow_layout.takeAt(0)
+            if item and item.widget():
+                w:InfoWidget = item.widget()
+                w.isDeleted = True
+                w.deleteLater()
+        self.s_clear_flowlayout.emit()
+        self.update_playlist_number()
+
+    def removeFlowLayout(self, w: QWidget):
+        self.flow_layout.removeWidget(w)
+        w.deleteLater()
+        self.update_playlist_number()
+
+    def update_playlist_number(self):
+        n = self.flow_layout.count()
+        self.label.setText(f"共计 {n} 个结果")

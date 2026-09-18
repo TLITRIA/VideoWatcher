@@ -1,0 +1,9 @@
+.build/
+.cache/
+.cookie/
+.dist/
+.webdriver/
+Resource/
+
+*.pyc
+*.spec

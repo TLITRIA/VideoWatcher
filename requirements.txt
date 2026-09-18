@@ -1,0 +1,4 @@
+netscape-cookies
+selenium
+pandas
+pyinstaller
