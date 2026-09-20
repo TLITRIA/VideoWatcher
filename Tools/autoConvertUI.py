@@ -1,9 +1,10 @@
 import os, sys
 import shutil
 from Common.Common import runcmdlist
+from os.path import abspath
 
-fold = R"E:\VideoWatcher\UI"
-pyuic6 = R"E:\VideoWatcher\.VideoWatcher\Scripts\pyuic6.exe"
+fold = abspath(R".\UI")
+pyuic6 = abspath(R".\.venv\Scripts\pyuic6.exe")
 
 
 def searchUIFile(fold):

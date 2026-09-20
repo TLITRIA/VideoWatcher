@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>579</width>
-    <height>303</height>
+    <width>690</width>
+    <height>340</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,10 +43,27 @@
    </item>
    <item row="0" column="0" colspan="3">
     <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="0" colspan="2">
+     <item row="2" column="0" colspan="3">
+      <widget class="QScrollArea" name="scrollArea">
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="scrollAreaWidgetContents">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>666</width>
+          <height>223</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="3">
       <widget class="QLineEdit" name="line_input"/>
      </item>
-     <item row="0" column="1">
+     <item row="0" column="2">
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Orientation::Horizontal</enum>
@@ -59,21 +76,14 @@
        </property>
       </spacer>
      </item>
-     <item row="2" column="0" colspan="2">
-      <widget class="QScrollArea" name="scrollArea">
-       <property name="widgetResizable">
-        <bool>true</bool>
+     <item row="0" column="1">
+      <widget class="QSpinBox" name="spinBox">
+       <property name="maximum">
+        <number>10000</number>
        </property>
-       <widget class="QWidget" name="scrollAreaWidgetContents">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>557</width>
-          <height>196</height>
-         </rect>
-        </property>
-       </widget>
+       <property name="value">
+        <number>200</number>
+       </property>
       </widget>
      </item>
      <item row="0" column="0">

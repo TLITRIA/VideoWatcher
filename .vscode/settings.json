@@ -3,7 +3,7 @@
         "--line-length", "80"
     ],
     "python.analysis.extraPaths": [
-        "E:/VideoWatcher"
+        "E:/venv"
     ],
     "python-envs.pythonProjects": [
         {
@@ -11,5 +11,5 @@
             "envManager": "ms-python.python:venv",
             "packageManager": "ms-python.python:pip"
         }
-    ],    
+    ],
 }

@@ -73,7 +73,7 @@ class PlayListWidget(QWidget, Ui_Form):
         self.update_playlist_number()
 
     def update_playlist(self):
-        playlist_df = parse_multi_playlistPage()
+        playlist_df = parse_multi_playlistPage(maxresult=self.spinBox.value())
         self.remove_allFlowLayout()
         for i in range(len(playlist_df)):
             w = InfoWidget(self)

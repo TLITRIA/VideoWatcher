@@ -4,14 +4,14 @@
         {
             "label": "build_package",
             "type": "shell",
-            "command": "${workspaceFolder}/.VideoWatcher/Scripts/pyinstaller.exe",
+            "command": "${workspaceFolder}/.venv/Scripts/pyinstaller.exe",
             "args": [
                 "--onedir",
                 "--name=${fileWorkspaceFolderBasename}",
                 "--distpath=${workspaceFolder}/.dist",
                 "--workpath=${workspaceFolder}/.build",
                 "--specpath=${workspaceFolder}/.spec",
-                "-p", "E:/VideoWatcher",
+                "-p", "E:/venv",
                 "--optimize", "2",
                 "--clean",
                 "-y",
@@ -33,7 +33,7 @@
         {
             "label": "pyqt_convert",
             "type": "shell",
-            "command": "${workspaceFolder}/.VideoWatcher/Scripts/python.exe",
+            "command": "${workspaceFolder}/.venv/Scripts/python.exe",
             "args":[
                 "${workspaceFolder}/Tools/autoConvertUI.py"
             ],

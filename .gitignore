@@ -4,6 +4,5 @@
 .dist/
 .webdriver/
 Resource/
-
 *.pyc
 *.spec

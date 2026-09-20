@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'E:\VideoWatcher\UI\biliPlaylistForm.ui'
+# Form implementation generated from reading ui file 'D:\__Project__\VideoWatcher\UI\biliPlaylistForm.ui'
 #
 # Created by: PyQt6 UI code generator 6.11.0
 #
@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(579, 303)
+        Form.resize(690, 340)
         self.gridLayout_2 = QtWidgets.QGridLayout(Form)
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.pushButton = QtWidgets.QPushButton(parent=Form)
@@ -25,19 +25,24 @@ class Ui_Form(object):
         self.gridLayout_2.addWidget(self.label, 1, 0, 1, 1)
         self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")
-        self.line_input = QtWidgets.QLineEdit(parent=Form)
-        self.line_input.setObjectName("line_input")
-        self.gridLayout.addWidget(self.line_input, 1, 0, 1, 2)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
-        self.gridLayout.addItem(spacerItem1, 0, 1, 1, 1)
         self.scrollArea = QtWidgets.QScrollArea(parent=Form)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 557, 196))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 666, 223))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-        self.gridLayout.addWidget(self.scrollArea, 2, 0, 1, 2)
+        self.gridLayout.addWidget(self.scrollArea, 2, 0, 1, 3)
+        self.line_input = QtWidgets.QLineEdit(parent=Form)
+        self.line_input.setObjectName("line_input")
+        self.gridLayout.addWidget(self.line_input, 1, 0, 1, 3)
+        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+        self.gridLayout.addItem(spacerItem1, 0, 2, 1, 1)
+        self.spinBox = QtWidgets.QSpinBox(parent=Form)
+        self.spinBox.setMaximum(10000)
+        self.spinBox.setProperty("value", 200)
+        self.spinBox.setObjectName("spinBox")
+        self.gridLayout.addWidget(self.spinBox, 0, 1, 1, 1)
         self.but_current = QtWidgets.QPushButton(parent=Form)
         self.but_current.setObjectName("but_current")
         self.gridLayout.addWidget(self.but_current, 0, 0, 1, 1)
