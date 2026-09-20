@@ -3,8 +3,8 @@
 # TODO:
 videowatch 寻找程序中临时布置的代码，并分轻重缓急处理：
     InfoWidget内部问题：
-        1-isblocked 程序更新和用户操作更新时不可
-        2-isdeleted 控件未能按时销毁
+        1-isblocked属性 程序更新和用户操作更新时不可
+        2-isdeleted属性 控件未能按时销毁
         3-im 同步所有infowidget更新
     focus 防止mywebwidget连接到已关闭的标签页
     BackWebDriver 为了适配后台运行的需求，似乎没必要，反正新进程的单例与主进程无关

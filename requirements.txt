@@ -2,3 +2,6 @@ netscape-cookies
 selenium
 pandas
 pyinstaller
+PyQt6
+PySide6
+ipdb
