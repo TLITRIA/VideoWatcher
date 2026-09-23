@@ -2,7 +2,8 @@
 .cache/
 .cookie/
 .dist/
-.webdriver/
 Resource/
 *.pyc
 *.spec
+
+UI/*.py

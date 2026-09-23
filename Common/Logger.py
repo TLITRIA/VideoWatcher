@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from contextlib import contextmanager
 from Pattern.singleton import singleton
 from Common.Common import *
+from Common.Abspath import default_log_fp
 
 @contextmanager
 def timeblock(label:str=""):
@@ -14,6 +15,7 @@ def timeblock(label:str=""):
     finally:
         end = time.perf_counter()
         print(f"{label} 耗时： {end - start:.6f} s")
+        # TODO 记录label/代码位置/运行频率/平均耗时，形成表格记录
 
 def mid_mess(mess:str, fillchar:str='='):
     if len(fillchar) != 1:
@@ -28,7 +30,7 @@ def logEnd():
 
 @singleton
 class Logger:
-    def __init__(self, log_fp: str = ''):
+    def __init__(self, log_fp: str = default_log_fp):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
         formatter = logging.Formatter(

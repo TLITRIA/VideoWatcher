@@ -22,8 +22,8 @@ class FlowLayout(QLayout):
         # if parent is not None:
         #     self.setContentsMargins(QMargins(0, 0, 0, 0))
         if parent is not None:
-            self.setContentsMargins(margin, margin, margin, margin)
-        self.setSpacing(spacing)
+            self.setContentsMargins(margin, margin, margin, margin) # 页边距
+        self.setSpacing(spacing) # 间距
 
         self._item_list = []
 

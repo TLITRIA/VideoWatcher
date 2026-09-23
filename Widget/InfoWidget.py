@@ -1,4 +1,4 @@
-from UI.infoFrom import Ui_Form
+from UI.infoForm import Ui_Form
 import os, sys
 import pandas as pd
 from os.path import abspath
@@ -13,8 +13,6 @@ from Common.BiliBili import *
 from Common.PyQt import *
 from Web.MyWebDriver import *
 from Web.biliParse import *
-
-abspath_arrow = "E:/VideoWatcher/Resource/rarrow.png"
 
 
 def qcompleter_init(comp: QCompleter, tar: QComboBox):
@@ -64,7 +62,7 @@ class InfoWidget(QWidget, Ui_Form):
         self.cb_add_v.clearEditText()
         if not tag or tag in self.v_select or not self._v_id:
             return
-        video_tag_insert(self.db, self._v_id, tag)
+        insert_video_tag(self.db, self._v_id, tag)
         self.update_video_tags()
 
     def on_video_del(self, i: int):
@@ -72,23 +70,23 @@ class InfoWidget(QWidget, Ui_Form):
         self.cb_del_v.clearEditText()
         if not tag or tag in self.v_unselect or not self._v_id:
             return
-        video_tag_delete(self.db, self._v_id, tag)
+        delete_video_tag(self.db, self._v_id, tag)
         self.update_video_tags()
 
     def on_up_tristate(self, state: Qt.CheckState):
         if self.isBlocked:
             return
-        exclude_up_update(
+        update_one_up_exclude(
             self.db, self._up_id, "", state == Qt.CheckState.Checked
         )
 
         if state == Qt.CheckState.PartiallyChecked:
             if match_upspace(self.wd._driver.current_url):
-                up_insert(self.db, parse_spacePage())
+                insert_up(self.db, parse_spacePage())
             else:
-                up_insertNull(self.db, self._up_id)
+                insert_up_null(self.db, self._up_id)
         else:
-            up_delete(self.db, self._up_id)
+            delete_up(self.db, self._up_id)
         self.im.update_up_collection(self._up_id, state)
 
     def on_up_add(self, i: int):
@@ -96,14 +94,14 @@ class InfoWidget(QWidget, Ui_Form):
         self.cb_add_up.clearEditText()
         if not tag or tag in self.up_select or not self._up_id:
             return
-        up_tag_insert(self.db, self._up_id, tag)
+        insert_up_tag(self.db, self._up_id, tag)
         self.update_up_tags()
 
     def on_up_del(self, i: int):
         tag = self.cb_del_up.currentText()
         if not tag or tag in self.up_unselect or not self._up_id:
             return
-        up_tag_delete(self.db, self._up_id, tag)
+        delete_up_tag(self.db, self._up_id, tag)
         self.update_up_tags()
 
     def del_infoW(self):
@@ -113,17 +111,14 @@ class InfoWidget(QWidget, Ui_Form):
     def __init__(self, parent=None):
         super(InfoWidget, self).__init__(parent)
         self.setupUi(self)
-
-        self.but_govideo.setIcon(QIcon(abspath_arrow))
-        self.but_gospace.setIcon(QIcon(abspath_arrow))
-        if not self.db.isConnected:
-            self.db.Connect(videowatcher_sql_fp)
+        # self.but_govideo.setIcon(QIcon(abspath_arrow))
+        # self.but_gospace.setIcon(QIcon(abspath_arrow))
         self.cb_add_up.setEditable(True)
         # self.cb_add_up.setPlaceholderText("添加用户标签")
         self.cb_add_v.setEditable(True)
         # self.cb_add_v.setPlaceholderText("添加视频标签")
 
-    def __del__(self):
+    def __del__(self):  # TODO 是否有这个函数？
         self.im.REMOVE(self)  # 从同步中删除
 
     def series_update_all(self, series: pd.Series):
@@ -195,9 +190,9 @@ class InfoWidget(QWidget, Ui_Form):
 
     def update_up_tags(self, select: list = [], unselect: list = []):
         if not select:
-            select = up_selectedTags(self.db, self._up_id)
+            select = get_up_selectedtags(self.db, self._up_id)
         if not unselect:
-            unselect = up_unselectedTags(self.db, self._up_id)
+            unselect = get_up_unselectedtags(self.db, self._up_id)
         self.up_select = select
         self.up_unselect = unselect
         self.cb_add_up.clear()
@@ -211,9 +206,9 @@ class InfoWidget(QWidget, Ui_Form):
 
     def update_video_tags(self, select: list = [], unselect: list = []):
         if not select:
-            select = video_selectedTags(self.db, self._v_id)
+            select = get_video_selectedtags(self.db, self._v_id)
         if not unselect:
-            unselect = video_unselectedTags(self.db, self._v_id)
+            unselect = get_video_unselectedtags(self.db, self._v_id)
         self.v_select = select
         self.v_unselect = unselect
         self.cb_add_v.clear()

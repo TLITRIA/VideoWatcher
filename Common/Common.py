@@ -1,6 +1,7 @@
 import os, sys
 import subprocess
 import hashlib
+import random
 from ipdb import set_trace as ist
 
 def g_chdir_byfp(__filepath: str):
@@ -31,3 +32,5 @@ def get_file_hash(file_path, hash_method=hashlib.sha256, block_size=65536):
             h.update(chunk)
     return h.hexdigest()
 
+def split_list(lst, n):
+    return (lst[i::n] for i in range(n))

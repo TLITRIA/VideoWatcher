@@ -15,9 +15,6 @@ from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.edge.service import Service as EdgeService
 
 
-g_bili_cookie = abspath(R"./.cookie/bilibili.json")
-g_bili_cookietxt = abspath(R"./.cookie/bilibili.txt")
-
 from Common.Convert import *
 from Common.Logger import *
 from Common.Common import *
@@ -29,10 +26,6 @@ from Web.MyWebDriver import *
 @singleton
 class MyWebDriver:
     def __init__(self):
-        # self._option = None
-        # self._service = None
-        # self._driver = None
-        # self._driver_wait = None
         self._chorme = "edge"
         self._isQuit = True
         self.selenium_options = [
@@ -49,10 +42,15 @@ class MyWebDriver:
         ]
 
     def __del__(self):
-        self.Quit()
+        if not self._isQuit:
+            self.Quit()
 
     def _generate_driver(self):
         self._option = EdgeOptions()
+        self._option.add_experimental_option("useAutomationExtension", False)
+        self._option.add_experimental_option(
+            "excludeSwitches", ["enable-automation"]
+        )
         for option in self.selenium_options:
             try:
                 self._option.add_argument(option)
@@ -72,10 +70,13 @@ class MyWebDriver:
     def Goto(self, url: str):
         if self._isQuit:
             self._generate_driver()
-        self.Focus()
-        if self._driver.current_url != url:
-            with timeblock(f"Goto({url})"):
-                self._driver.get(url)
+        # self.Focus()
+        try:
+            if self._driver.current_url != url:
+                with timeblock(f"Goto({url})"):
+                    self._driver.get(url)
+        except WebDriverException as e:
+            self._driver.get(url)
         return self._driver
 
     def xpath_findall(self, xp):
@@ -122,17 +123,24 @@ class MyWebDriver:
                 set(self._driver.window_handles) - set(before_handles)
             )[0]
             self._driver.switch_to.window(new_handle)
+            print("转到新窗口")
         except:
             pass
 
-    def ifLoginBilibili(self,):
-        return bool(self.xpath_findall("//div/div/span[contains(text(), '登录')]") == [])
-    
+    def ifLoginBilibili(
+        self,
+    ):
+        return bool(
+            self.xpath_findall("//div/div/span[contains(text(), '登录')]") == []
+            and self.xpath_findall("//div[@class='bili-avatar']") != []
+        )
+
     def Login(
         self,
         url="https://www.bilibili.com/",
-        cookie_fp=g_bili_cookie,
-        cookietxt_fp=g_bili_cookietxt,
+        cookie_fp=default_bili_cookie,
+        cookietxt_fp=default_bili_cookietxt,
+        cookie_ytdlp_fp=default_bili_cookie_ytdlp,
         domains=[".bilibili.com"],
         func=None,
         args=None,
@@ -169,6 +177,11 @@ class MyWebDriver:
             if not os.path.exists(cookietxt_fp):
                 g_mkdir_byfp(cookietxt_fp)
             save_cookies_to_file(self._driver.get_cookies(), cookietxt_fp)
+            # 手动添加前缀 ： {# Netscape HTTP Cookie File}
+            with open(cookietxt_fp, "r") as fr:
+                content = fr.read()
+                with open(cookie_ytdlp_fp, "w") as fw:
+                    fw.write("# Netscape HTTP Cookie File\n" + content)
 
         if hasHeadless:
             self.selenium_options.append("--headless")
@@ -185,13 +198,17 @@ class MyWebDriver:
         for _ in range(2):
             body.send_keys(Keys.HOME)
 
-    def Focus(self):
+    def FocusHead(self):
         """
         强制转到第一个窗口
         """
-        wd = MyWebDriver()
-        if not self._isQuit and hasattr(wd, "_driver") and len(wd._driver.window_handles):
-            wd._driver.switch_to.window(wd._driver.window_handles[0])
+        print("转到第一个窗口")
+        if (
+            not self._isQuit
+            and hasattr(self, "_driver")
+            and len(self._driver.window_handles)
+        ):
+            self._driver.switch_to.window(self._driver.window_handles[0])
 
 
 def xpath(node: WebElement, xp: str):
@@ -236,7 +253,7 @@ def turning_page(
     f_getnextbut: Callable[[MyWebDriver],],
     f_concat: Callable[[pandas.DataFrame, pandas.DataFrame], pandas.DataFrame],
     f_interse: Callable[[pandas.DataFrame, pandas.DataFrame], bool],
-    maxrets: int = -1, # 默认全部读取
+    maxrets: int = -1,  # 默认全部读取
 ) -> pandas.DataFrame:
     results = pandas.DataFrame()
     if wd._driver.current_url != start_url:
@@ -252,8 +269,11 @@ def turning_page(
         try:
             wd.ClickNode(f_getnextbut(wd)[0])
         except:
-            break  # TODO
+            break
         time.sleep(2)
+    # 如果df数目超出，截取前n项
+    if results.shape[0] > maxrets:
+        results = results.iloc[:maxrets]
     return results
 
 

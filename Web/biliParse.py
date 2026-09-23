@@ -2,7 +2,8 @@ import re
 import pandas as pd
 import traceback
 from Web.MyWebDriver import *
-from Web.BackWebDriver import *
+
+# from Web.BackWebDriver import *
 from Web.biliPlayListParse import *
 
 from Common.BiliBili import *
@@ -227,15 +228,15 @@ def parse_spacePage(wd=None) -> pd.DataFrame:
             print("未访问空间视频页")
             return df
 
-        up_name = wd.xpath_findall(
-            '//div[@data-v-72f03be2 and @class="nickname"]'
-        )[0].get_attribute("textContent")
+        up_name = wd.xpath_findall('//div[@class="nickname"]')[0].get_attribute(
+            "textContent"
+        )
         info.append(up_name)
         columns.append("up_name")
 
-        intro = wd.xpath_findall(
-            '//div[@data-v-9b33e4bd and @class="pure-text" and @title]'
-        )[0].get_attribute("title")
+        intro = wd.xpath_findall('//div[@class="pure-text" and @title]')[
+            0
+        ].get_attribute("title")
         info.append(intro)
         columns.append("intro")
 
@@ -291,25 +292,25 @@ def back_update_up(urls: list):
     """
     if len(urls) == 0:
         return
-    bd: BackWebDriver = BackWebDriver()
     db = DataBase()
     db.Connect(videowatcher_sql_fp)
-    if "--headless" in bd.selenium_options:
-        bd.selenium_options.remove(
-            "--headless"
-        ) 
-    bd.Login()
+
+    wd = MyWebDriver()
+    wd.selenium_options.append("--force-dark-mode")
+    wd.selenium_options.append("--mute-audio")
+    wd.Login()
+    wd._driver.minimize_window()
 
     for index, url in enumerate(urls):
         try:
             print(f"进度条：{index+1}/{len(urls)}")
-            bd.Goto(url)
-            up_insert(db, parse_spacePage(bd))
-            bd.xpath_wait(videoinfo_xpath)
+            wd.Goto(url)
+            insert_up(db, parse_spacePage(wd))
+            wd.xpath_wait(videoinfo_xpath)
             time.sleep(1)
         except:
             print(f"第 {index+1} 个up主 {url} 抓取失败")
-    bd.Quit()
+    wd.Quit()
     if len(get_up_id_whichvideoisnotnew(db)) > 0:
         print("up主未能更新最新视频")  # TODO: 通知
 
@@ -317,31 +318,81 @@ def back_update_up(urls: list):
 def back_update_video(urls: list):
     if len(urls) == 0:
         return
-    bd: BackWebDriver = BackWebDriver()
     db = DataBase()
     db.Connect(videowatcher_sql_fp)
-    if "--headless" in bd.selenium_options:
-        bd.selenium_options.remove("--headless")
-    bd.Login()
+
+    wd = MyWebDriver()
+    wd.selenium_options.append("--force-dark-mode")
+    wd.selenium_options.append("--mute-audio")
+    wd.Login()
+    wd._driver.minimize_window()
 
     for index, url in enumerate(urls):
-        bd.Goto(url)
+        wd.Goto(url)
         time.sleep(1)
         maxresult = 0
-        up_id = str(match_upspace(bd._driver.current_url))
+        up_id = str(match_upspace(wd._driver.current_url))
         try:
             maxresult = get_len_missingvideo(db, up_id)
         except:
             pass
         print(f"{index+1} / {len(urls)} : {url}")
         print(f"该up缺少的视频数量为{maxresult}, 抓取指定数量的视频")
-        df = parse_multi_back_playlistPage(bd, maxresult)
-        video_insert(db, df)
-        if get_len_missingvideo(db, up_id) > 0:# 出现这种情况意味着可能中间有视频未抓取或者失效，需要完整地爬取
+        df = parse_multi_back_playlistPage(wd, maxresult)
+        insert_video(db, df)
+        if (
+            get_len_missingvideo(db, up_id) > 0
+        ):  # 出现这种情况意味着可能中间有视频未抓取或者失效，需要完整地爬取
             print(f"up主 {url} 的视频没有全部抓取到")
             # TODO 清空该up的视频
-            bd.Goto(url)
+            wd.Goto(url)
             time.sleep(1)
-            df = parse_multi_back_playlistPage(bd)
-            video_insert(db, df)
-    bd.Quit()
+            df = parse_multi_back_playlistPage(wd)
+            insert_video(db, df)
+    wd.Quit()
+
+
+def back_update_all(urls: list, db_fp: str):
+    if len(urls) == 0:
+        return
+    db = DataBase()
+    db.Connect(db_fp)
+
+    wd = MyWebDriver()
+    wd.selenium_options.append("--force-dark-mode")
+    wd.selenium_options.append("--mute-audio")
+    wd.Login()
+    wd._driver.minimize_window()
+
+    for index, url in enumerate(urls):
+        wd.Goto(url)
+        time.sleep(3)
+        wd._driver.execute_script(
+            "document.title = arguments[0];",
+            f"{index+1} / {len(urls)} " + wd._driver.title,
+        )
+        wd.xpath_wait(videoinfo_xpath)
+        insert_up(db, parse_spacePage(wd))
+
+        maxresult = 0
+        up_id = str(match_upspace(wd._driver.current_url))
+        try:
+            maxresult = get_len_missingvideo(db, up_id)
+        except:
+            pass
+
+        print(f"该up缺少的视频数量为{maxresult}, 抓取指定数量的视频")
+        df = parse_multi_back_playlistPage(wd, maxresult)
+        insert_video(db, df)
+        if (
+            get_len_missingvideo(db, up_id) > 0
+        ):  # 出现这种情况意味着可能中间有视频未抓取或者失效，需要完整地爬取
+            print(f"up主 {url} 的视频没有全部抓取到")
+            wd.Goto(url)
+            time.sleep(1)
+            df = parse_multi_back_playlistPage(wd)
+            insert_video(db, df)
+            # 如果再次
+
+    wd.Quit()
+    db.Disconnect()

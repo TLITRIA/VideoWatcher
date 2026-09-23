@@ -1,33 +1,39 @@
-from os.path import abspath 
-from Widget.EntryWidget import *
-from PyQt6.QtWidgets import QApplication
-from Common.Logger import *
+import sys
+import traceback
 from Common.Process import *
+from Common.Logger import *
+from Common.Abspath import *
+from Web.MyWebDriver import *
 from DataAccess.DataBase import *
 from DataAccess.sql_query import *
-from Web.MyWebDriver import MyWebDriver
+from PyQt6.QtWidgets import QApplication
+from Widget.EntryWidget import EntryWidget
 
 if __name__ == "__main__":
+
+    app = QApplication(sys.argv)
+
     pm = ProcessManager()
     pm.StartWorkers(3)
-    
-    l = Logger(abspath("./.cache/log/tmp.log"))
+
+    l = Logger()
     l.info(logStart())
-    
+
     wd = MyWebDriver()
     wd.Login()
 
     db = DataBase()
-    db.Connect(videowatcher_sql_fp)
+    # db.Connect(videowatcher_sql_fp)
+    db.Connect("D:/__Downloads__/videowatcher.db")
     create_all(db, videowatcher_sqls)
-
-    app = QApplication(sys.argv)
 
     entry = EntryWidget()
     entry.show()
+    # entry.pushButton_6.click() # 默认收藏夹
+    entry.pushButton_4.click() # 所有Up重新读取
 
-    sys.exit(app.exec())
+    app.exec()
+    pm.__del__()
     l.info(logEnd())
     wd.Quit()
-    db.Close()
-        
+    db.Disconnect()

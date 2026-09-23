@@ -5,3 +5,6 @@ pyinstaller
 PyQt6
 PySide6
 ipdb
+yt-dlp
+matplotlib
+numpy

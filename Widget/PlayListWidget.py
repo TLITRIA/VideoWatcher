@@ -35,33 +35,32 @@ class PlayListWidget(QWidget, Ui_Form):
         d.exec()
 
     def on_click_current(self):
-        self.wd.Focus()
+        # self.wd.FocusHead() 如何聚焦到当前打开的网站上？尤其是会手动更换窗口位置的情况下？
         if match_playlist(self.wd._driver.current_url):
             self.wd._driver.refresh()
             self.update_playlist()
 
     def on_click_cleanFlowlayout(self):
         data = []
-        for i in range(self.flow_layout.count()-1, -1, -1):
+        for i in range(self.flow_layout.count() - 1, -1, -1):
             item = self.flow_layout.itemAt(i)
             if not item:
                 continue
             w: InfoWidget = item.widget()
-            if exist_up(DataBase(), w._up_id) or exclude_up(
+            if exist_up(DataBase(), w._up_id) or exist_up_exclude(
                 DataBase(), w._up_id
             ):
                 data.append([w._v_id, w._fold_name])
                 w.s_del_infoW.emit(w)
         pm = ProcessManager()
         pm.AddTask(remove_video_fromFold, *[data])
-        # remove_video_fromFold(data)
 
     def del_infoW(self, w: InfoWidget):
         self.flow_layout.removeWidget(w)
         w.isDeleted = True
         w.deleteLater()
         self.update_playlist_number()
-        
+
     def __init__(self, parent=None):
         super(PlayListWidget, self).__init__(parent)
         self.setupUi(self)
@@ -83,8 +82,8 @@ class PlayListWidget(QWidget, Ui_Form):
             if up_df.shape[0]:
                 face = up_df["face"][0]
 
-            df = playlist_df.iloc[i]  
-            df['face'] = face
+            df = playlist_df.iloc[i]
+            df["face"] = face
             args = [
                 playlist_df["v_id"].iloc[i],
                 playlist_df["up_id"].iloc[i],

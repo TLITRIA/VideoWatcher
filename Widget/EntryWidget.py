@@ -18,13 +18,13 @@ from DataAccess.sql_query import *
 class EntryWidget(QWidget, Ui_Form):
     _wd = MyWebDriver()
 
-    def goto(self, url: str):
-        # self._wd.Focus()  # 为什么要添加这个？
-        self._wd.Goto(url)
-        self.focus()
+    # def goto(self, url: str):
+    #     # self._wd.Focus()  # 为什么要添加这个？
+    #     self._wd.Goto(url)
+    #     self.focus()
 
     def on_update_fillup(self):
-        up_ids = get_unfill_up_id(DataBase())
+        up_ids = get_up_unfilled(DataBase())
         urls = []
         for up_id in up_ids:
             urls.append(f"https://space.bilibili.com/{up_id}/upload/video")
@@ -60,12 +60,11 @@ class EntryWidget(QWidget, Ui_Form):
         pm.AddTask(back_update_video, *[urls])
 
     def on_click_defaultplaylist(self):
-        self._wd.Focus()
         goto_default_collectfolder(self._wd)
         self.focus()
 
     def on_click_dbview(self):
-        self.dbw = DbWidget() # w 的生命周期
+        self.dbw = DbWidget()  # w 的生命周期
         self.dbw.show()
 
     def __init__(self, parent=None):
@@ -73,13 +72,11 @@ class EntryWidget(QWidget, Ui_Form):
         self.setupUi(self)
 
     def focus(self):
-        self._wd.Focus()
+        self._wd.FocusHead()
         url = self._wd._driver.current_url
         if match_upspace(url):  # bilibili up主视频页
             w = InfoWidget()
             w.series_update_all(parse_spacePage().iloc[0])
-            # w.s_goto_upspace.connect(self.goto)
-            # w.s_goto_videopage.connect(self.goto)
             w.s_goto_videopage.connect(lambda url: self._wd.Goto(url))
             w.s_goto_upspace.connect(lambda url: self._wd.Goto(url))
             w.show()
@@ -87,13 +84,11 @@ class EntryWidget(QWidget, Ui_Form):
         elif match_video(url):  # bilibili视频页
             w = VideoPageWidget()
             w.updateData()
-            # w.s_goto.connect(self.goto)
             w.s_goto.connect(lambda url: self._wd.Goto(url))
             w.show()
             return
         elif match_playlist(url):
             w = PlayListWidget()
-            # w.s_goto.connect(self.goto)
             w.s_goto.connect(lambda url: self._wd.Goto(url))
             w.update_playlist()
             w.show()

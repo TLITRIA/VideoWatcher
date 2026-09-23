@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>298</width>
+    <height>151</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3">
+   <item row="0" column="2">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="0" column="0">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <widget class="QLabel" name="v_cover">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>45</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>45</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="up_face">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>80</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>80</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="0" column="1">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QPushButton" name="but_govideo">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>25</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(255, 255, 255);</string>
+       </property>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+       <property name="default">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QPushButton" name="but_quit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>21</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>X</string>
+       </property>
+       <property name="default">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="QComboBox" name="cb_add_v"/>
+     </item>
+     <item row="1" column="2" colspan="2">
+      <widget class="QComboBox" name="cb_del_v"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QPushButton" name="but_gospace">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>25</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(255, 255, 255);</string>
+       </property>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+       <property name="default">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="QToolButton" name="toolButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0" colspan="2">
+      <widget class="QComboBox" name="cb_add_up"/>
+     </item>
+     <item row="3" column="2" colspan="2">
+      <widget class="QComboBox" name="cb_del_up"/>
+     </item>
+     <item row="0" column="1" colspan="2">
+      <widget class="QLabel" name="label_title">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>title</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1" colspan="2">
+      <widget class="QCheckBox" name="cb_upselect">
+       <property name="styleSheet">
+        <string notr="true">QCheckBox::indicator:unchecked {
+    border: 2px solid #999;
+    border-radius: 4px;
+    background-color: white;
+}
+
+QCheckBox::indicator:checked {
+    border: 2px solid red;
+    border-radius: 4px;
+    background-color: red;
+    color: white;
+    font-size: 16px;
+    text-align: center;
+}
+
+QCheckBox::indicator:indeterminate {
+    border: 2px solid green;
+    border-radius: 4px;
+    background-color: green;
+    color: white;
+    font-size: 16px;
+    text-align: center;
+}</string>
+       </property>
+       <property name="text">
+        <string>up_name</string>
+       </property>
+       <property name="tristate">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>but_govideo</tabstop>
+  <tabstop>but_quit</tabstop>
+  <tabstop>cb_add_v</tabstop>
+  <tabstop>cb_del_v</tabstop>
+  <tabstop>but_gospace</tabstop>
+  <tabstop>cb_upselect</tabstop>
+  <tabstop>toolButton</tabstop>
+  <tabstop>cb_add_up</tabstop>
+  <tabstop>cb_del_up</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>but_govideo</sender>
+   <signal>clicked()</signal>
+   <receiver>Form</receiver>
+   <slot>slot_goto_video()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>98</x>
+     <y>14</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>257</x>
+     <y>10</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>but_gospace</sender>
+   <signal>clicked()</signal>
+   <receiver>Form</receiver>
+   <slot>slot_goto_space()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>109</x>
+     <y>95</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>257</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_add_v</sender>
+   <signal>activated(int)</signal>
+   <receiver>Form</receiver>
+   <slot>on_video_add(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>130</x>
+     <y>49</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>257</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_del_v</sender>
+   <signal>activated(int)</signal>
+   <receiver>Form</receiver>
+   <slot>on_video_del(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>230</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>257</x>
+     <y>52</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_add_up</sender>
+   <signal>activated(int)</signal>
+   <receiver>Form</receiver>
+   <slot>on_up_add(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>131</x>
+     <y>133</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>257</x>
+     <y>96</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_del_up</sender>
+   <signal>activated(int)</signal>
+   <receiver>Form</receiver>
+   <slot>on_up_del(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>203</x>
+     <y>125</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>257</x>
+     <y>107</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolButton</sender>
+   <signal>clicked()</signal>
+   <receiver>Form</receiver>
+   <slot>on_click_toolbut()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>241</x>
+     <y>91</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>96</x>
+     <y>5</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>but_quit</sender>
+   <signal>clicked()</signal>
+   <receiver>Form</receiver>
+   <slot>del_infoW()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>232</x>
+     <y>21</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>227</x>
+     <y>0</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_upselect</sender>
+   <signal>checkStateChanged(Qt::CheckState)</signal>
+   <receiver>Form</receiver>
+   <slot>on_up_tristate(Qt::CheckState)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>175</x>
+     <y>91</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>170</x>
+     <y>148</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>slot_goto_video()</slot>
+  <slot>slot_goto_space()</slot>
+  <slot>toggle(bool)</slot>
+  <slot>on_video_add(int)</slot>
+  <slot>on_video_del(int)</slot>
+  <slot>on_up_add(int)</slot>
+  <slot>on_up_del(int)</slot>
+  <slot>on_click_toolbut()</slot>
+  <slot>del_infoW()</slot>
+  <slot>on_up_tristate(Qt::CheckState)</slot>
+ </slots>
+</ui>
