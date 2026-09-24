@@ -42,15 +42,15 @@ class TestRunWithoutError(unittest.TestCase):
         cls.db.Disconnect()
         cls.wd.Quit()
 
-    @unittest.skip('todo')
     def test_first_up_in_excludeup(self):
         """测试编辑excludeup表中第一条记录"""
         try:
             w = ExcludeUpInfoWidget()
             w.show()
             df = get_all_up_exclude_df(self.db)
+            if len(df) == 0:
+                return
             w.series_update_all(df.iloc[0])
-
             self.app.processEvents()
         except Exception:
             self.fail(

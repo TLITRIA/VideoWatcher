@@ -41,7 +41,7 @@ def parse_current_playlistPage(wd=None) -> pd.DataFrame:
         )
         if len(fold_nodes):
             fold_name = fold_nodes[0].get_attribute("title")
-            
+
     for index, node in enumerate(
         nodes
     ):  # //div[@class="bili-video-card__wrap"]
@@ -105,9 +105,10 @@ def parse_current_playlistPage(wd=None) -> pd.DataFrame:
     return df
 
 
-def parse_back_playlistPage(wd=None) -> pd.DataFrame:
+def parse_other_playlistPage(wd=None) -> pd.DataFrame:
     """
     解析当前播放列表页面
+    由于是他人的播放列表，不需要解析列表名称
     :param wd: WebDriver
     :return: DataFrame
     """
@@ -115,6 +116,7 @@ def parse_back_playlistPage(wd=None) -> pd.DataFrame:
         wd = MyWebDriver()
     df = pd.DataFrame()
     tmp_count = 0
+
     nodes = wd.xpath_wait(videoinfo_xpath)
     while len(nodes) == 0:
         nodes = wd.xpath_wait(videoinfo_xpath)
@@ -125,8 +127,15 @@ def parse_back_playlistPage(wd=None) -> pd.DataFrame:
             print("页面解析失败，疑似404")
             return df
 
-    up_id = match_upspace(wd._driver.current_url)
+    time.sleep(3) # TODO 固定延时能不能缩短
+    # wd.xpath_wait('//a[@target="_blank"]')
+    # wd.xpath_wait('//div[@class="bili-video-card__title"]')
+    # wd.xpath_wait("//img")
+    # wd.xpath_wait('//div/div[@class="bili-cover-card__stat"]')
+    # wd.xpath_wait('//div[@class="bili-video-card__wrap"]//a[@target="_blank" and @href]')
 
+    nodes = wd.xpath_wait(videoinfo_xpath)
+    up_id = match_upspace(wd._driver.current_url)
     for index, node in enumerate(
         nodes
     ):  # //div[@class="bili-video-card__wrap"]
@@ -134,8 +143,7 @@ def parse_back_playlistPage(wd=None) -> pd.DataFrame:
             tmp_df = pd.DataFrame()
             info = []
             columns = []
-
-            _node = xpath(node, './/a[@target="_blank"]')[0]
+            _node = xpath(node, './/a[@target="_blank" and @href]')[0]
             href = _node.get_attribute("href")
             if href:
                 match = re.match(
@@ -197,25 +205,34 @@ def parse_back_playlistPage(wd=None) -> pd.DataFrame:
             if dt:
                 dt = dt.strip()
                 if len(dt) == 5:
-                    duration = int(dt.split(":")[0]) * 60 + int(dt.split(":")[1])
+                    duration = int(dt.split(":")[0]) * 60 + int(
+                        dt.split(":")[1]
+                    )
                 elif len(dt) == 8:
-                    duration = int(dt.split(":")[0]) * 3600 + int(dt.split(":")[1]) * 60 + int(dt.split(":")[2])
+                    duration = (
+                        int(dt.split(":")[0]) * 3600
+                        + int(dt.split(":")[1]) * 60
+                        + int(dt.split(":")[2])
+                    )
             info.extend([play, danmu, duration])
             columns.extend(["play", "danmu", "duration"])
 
-
-            info.append(1 if "充电专属" in str(node.get_attribute("textContent")) else 0)
+            info.append(
+                1 if "充电专属" in str(node.get_attribute("textContent")) else 0
+            )
             columns.append("isCharge")
 
             data_time = get_timestamp()
             info.append(data_time)
             columns.append("data_time")
 
-
             tmp_df = pd.DataFrame([info], columns=columns)
             df = pd.concat([df, tmp_df], ignore_index=True)
-        except:
+        except Exception as e:
+            print("+" * 80)
+            print(f"{index+1} / {len(nodes)}")
             traceback.print_exc()
+            print("+" * 80)
     return df
 
 
@@ -257,7 +274,9 @@ def df_intersect(df1: pd.DataFrame, df2: pd.DataFrame) -> bool:
         return len(common_set) > 0
 
 
-def parse_multi_playlistPage(wd=None, maxresult=200) -> pd.DataFrame: # 默认读取少量信息
+def parse_multi_playlistPage(
+    wd=None, maxresult=200
+) -> pd.DataFrame:  # 默认读取少量信息
     """
     解析B站收藏夹列表
     :return: DataFrame
@@ -293,7 +312,7 @@ def parse_multi_back_playlistPage(wd=None, maxresult=-1) -> pd.DataFrame:
         df = turning_page(
             wd,
             wd._driver.current_url,
-            parse_back_playlistPage,
+            parse_other_playlistPage,
             get_biliPlaylist_nextbut,
             df_concat,
             df_intersect,

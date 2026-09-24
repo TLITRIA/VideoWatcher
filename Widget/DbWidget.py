@@ -39,7 +39,7 @@ class DbWidget(QWidget, Ui_Form):
 
     def on_click_bili_up(self):
         self.FlowlayoutClear()
-        df = get_all_up_df(self.__db)
+        df = get_all_up_info(self.__db)
         self.AddInfoWidgets(df)
 
     def __init__(self, parent=None):

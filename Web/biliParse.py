@@ -214,7 +214,11 @@ def parse_spacePage(wd=None) -> pd.DataFrame:
         wd = MyWebDriver()
     info = []
     columns = []
+    time.sleep(5)
     wd.xpath_wait(videoinfo_xpath)
+    wd.xpath_wait(
+        "//div[@class='b-avatar__layer__res']//source[@type='image/webp' and @srcset]"
+    )
     try:
         data_time = get_timestamp()
         info.append(data_time)
@@ -250,14 +254,16 @@ def parse_spacePage(wd=None) -> pd.DataFrame:
         info.append(up_sum)
         columns.append("up_sum")
 
-        face = wd.xpath_wait(
+        facenodes = wd.xpath_wait(
             "//div[@class='b-avatar__layer__res']//source[@type='image/webp' and @srcset]"
-        )[0].get_attribute("srcset")
-        if face:
-            face = face.split("@")[0]
-            face = f"https:{face}"
-        info.append(face)
-        columns.append("face")
+        )
+        if len(facenodes):
+            face = facenodes[0].get_attribute("srcset")
+            if face:
+                face = face.split("@")[0]
+                face = f"https:{face}"
+            info.append(face)
+            columns.append("face")
 
         nodes = wd.xpath_findall(videoinfo_xpath)
         # upload_lasttitle = xpath(
@@ -280,7 +286,10 @@ def parse_spacePage(wd=None) -> pd.DataFrame:
         columns.append("up_last_time")
 
     except:
+        print("+" * 80)
+        print(f"{wd._driver.current_url}")
         traceback.print_exc()
+        print("+" * 80)
     df = pd.DataFrame([info], columns=columns)
     # print(df)
     return df
@@ -380,7 +389,7 @@ def back_update_all(urls: list, db_fp: str):
             maxresult = get_len_missingvideo(db, up_id)
         except:
             pass
-
+        print(f"{index+1} / {len(urls)} : {url}")
         print(f"该up缺少的视频数量为{maxresult}, 抓取指定数量的视频")
         df = parse_multi_back_playlistPage(wd, maxresult)
         insert_video(db, df)
@@ -388,11 +397,11 @@ def back_update_all(urls: list, db_fp: str):
             get_len_missingvideo(db, up_id) > 0
         ):  # 出现这种情况意味着可能中间有视频未抓取或者失效，需要完整地爬取
             print(f"up主 {url} 的视频没有全部抓取到")
+            delete_allvideo_byupid(db, up_id)
             wd.Goto(url)
             time.sleep(1)
             df = parse_multi_back_playlistPage(wd)
             insert_video(db, df)
-            # 如果再次
 
     wd.Quit()
     db.Disconnect()

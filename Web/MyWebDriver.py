@@ -270,7 +270,6 @@ def turning_page(
             wd.ClickNode(f_getnextbut(wd)[0])
         except:
             break
-        time.sleep(2)
     # 如果df数目超出，截取前n项
     if results.shape[0] > maxrets:
         results = results.iloc[:maxrets]

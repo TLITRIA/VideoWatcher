@@ -43,7 +43,7 @@ class TestRunWithoutError(unittest.TestCase):
         with timeblock("数据库操作"):
             print("-" * 80)
             print("获取up表中所有的信息，以dataframe形式返回")
-            print(get_all_up_df(self.db))
+            print(get_all_up_info(self.db))
         with timeblock("数据库操作"):
             print("-" * 80)
             print("获取up_exclude表中所有标记排除的up的信息，以df形式返回")
@@ -56,5 +56,3 @@ class TestRunWithoutError(unittest.TestCase):
             print("-" * 80)
             print("获取up表中缺少最新video的up的up_id")
             pprint(get_up_id_whichvideoisnotnew(self.db))
-
-

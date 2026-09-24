@@ -14,7 +14,7 @@ def timeblock(label:str=""):
         yield
     finally:
         end = time.perf_counter()
-        print(f"{label} 耗时： {end - start:.6f} s")
+        print(f"{label} 耗时：{end - start:.6f} s")
         # TODO 记录label/代码位置/运行频率/平均耗时，形成表格记录
 
 def mid_mess(mess:str, fillchar:str='='):

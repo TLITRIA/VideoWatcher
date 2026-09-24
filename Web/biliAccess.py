@@ -79,11 +79,13 @@ def goto_TODOWN_collectfolder(wd: MyWebDriver):
     wd.xpath_wait('//div[@class="bili-video-card__wrap"]')
 
 
-def download_video(bv, downfold, cookie="", limit_rate:int=0) -> subprocess.CompletedProcess:
+def download_video(
+    bv, downfold, cookie="", limit_rate: int = 0
+) -> subprocess.CompletedProcess:
     """下载B站视频"""
     url = BV2url(bv)
     if os.path.exists(downfold):
-        shutil.rmtree(downfold) # TODO 危险操作
+        shutil.rmtree(downfold)  # TODO 危险操作
     g_mkdir_byfp(downfold)
 
     cmd = ["yt-dlp"]
@@ -91,15 +93,17 @@ def download_video(bv, downfold, cookie="", limit_rate:int=0) -> subprocess.Comp
         ["--no-check-certificate"] if cookie == "" else ["--cookies", cookie]
     )  # 使用cookie
     if limit_rate > 0:
-        cmd.extend(["-r", f"{limit_rate}m"]) # 限速
+        cmd.extend(["-r", f"{limit_rate}m"])  # 限速
     # TODO 画质选择
     cmd.append("-i")
     cmd.extend(["-o", downfold + "%(title)s.%(ext)s"])  # 输出格式
     cmd.append(url)
+    # TODO 下载字幕文件
 
     result = subprocess.run(
         cmd, shell=True, stdout=sys.stdout, stderr=sys.stderr, text=True
     )
+    time.sleep(5)
     return result
 
 
@@ -116,7 +120,9 @@ if __name__ == "__main__":
     upids = search_up_bytags(db, up_tags)
     df = pd.DataFrame()
     for upid in upids:
-        df = pd.concat([df, get_allvideo_byupid(db, upid)], ignore_index=True)
+        df = pd.concat(
+            [df, get_allvideoinfo_byupid(db, upid)], ignore_index=True
+        )
 
     root = abspath(r"./.cache/download_specified_tags/")
 

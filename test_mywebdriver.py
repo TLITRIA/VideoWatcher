@@ -50,11 +50,11 @@ class Test_1(unittest.TestCase):
             self.wd._driver.refresh()
         self.assertTrue(self.wd.ifLoginBilibili())
 
-    @unittest.skip('把download文件夹全删了')
+    # @unittest.skip('把download文件夹全删了')
     def test_download_bilibili(self):
         """检查下载功能"""
         result = download_video(
-            "BV1nwauzREuU", R"D:\__Downloads__\cache", default_bili_cookie_ytdlp
+            "BV1nwauzREuU", abspath(R"./.cache/test") + '/', default_bili_cookie_ytdlp
         )
         self.assertEqual(result.returncode, 0)
 

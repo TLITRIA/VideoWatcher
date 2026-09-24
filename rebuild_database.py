@@ -18,10 +18,20 @@ if __name__ == "__main__":
     create_all(db, videowatcher_sqls)
     # ==================================== #
 
-    urls = [
-        f"https://space.bilibili.com/{x}/upload/video"
-        for x in get_all_up_id(db)
-    ]
+    up_ids = []
+
+    df = get_all_up_info(db)
+    df = df.sort_values(by='data_time')
+    for i in range(len(df)):
+        series = df.iloc[i]
+        if int(series['data_time']) < get_timestamp() - 60*60*24:
+            up_ids.append(series['up_id'])
+            continue
+        if int(series['up_sum']) == len(get_allvideoinfo_byupid(db, series['up_id'])):
+            continue
+        up_ids.append(series['up_id'])
+    urls = [f"https://space.bilibili.com/{x}/upload/video" for x in up_ids]
+    print(f"共计 {len(urls)} 个b站Up需要更新数据")
     back_update_all(urls, db_fp)
     # ==================================== #
 

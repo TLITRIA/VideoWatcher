@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS up(
     data_time INT, -- 数据更新时间
     tag_time INT, -- tag更新时间
     PRIMARY KEY (up_id)
-);""",
+);""",  # TODO url
     """
 CREATE TABLE IF NOT EXISTS up_tag(
     up_id TEXT NOT NULL, -- up主id号
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS video(
     data_time INT, -- 数据更新时间
     tag_time INT, -- tag更新时间
     PRIMARY KEY (v_id)
-);""",
+);""",  # TODO url
     """
 CREATE TABLE IF NOT EXISTS video_tag(
     v_id TEXT NOT NULL, -- 视频id号
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS up_exclude(
     reason TEXT, -- 排除原因
     yes_no INT, -- 是否排除 1是 0否
     PRIMARY KEY (up_id)
-);""",
+);""",  # TODO url
 ]
 
 
@@ -72,11 +72,11 @@ def create_all(db: DataBase, sqls: list):
             traceback.print_exc()
 
 
-def insert_up_null(db: DataBase, up_id: str):
+def insert_up_null(db: DataBase, up_id: str, table="up"):
     """向up表中插入除up_id外其他字段为null的数据"""
     if not db.isConnected:
         return False
-    sql = f"INSERT INTO up(up_id) VALUES('{up_id}');"
+    sql = f"INSERT INTO {table}(up_id) VALUES('{up_id}');"
     try:
         db.ExecuteNow(sql)
         return True
@@ -84,11 +84,11 @@ def insert_up_null(db: DataBase, up_id: str):
         return False
 
 
-def insert_up(db: DataBase, df: pd.DataFrame):
+def insert_up(db: DataBase, df: pd.DataFrame, table="up"):
     """向up表中插入数据，会自动选择插入哪些字段，不插入哪些字段"""
     if not db.isConnected:
         return False
-    result = db.conn.execute(f"PRAGMA table_info(up)")
+    result = db.conn.execute(f"PRAGMA table_info({table})")
     db_columns = [row[1] for row in result]
     columns_to_write = [col for col in df.columns if col in db_columns]
     df_filtered = df[columns_to_write]
@@ -98,21 +98,21 @@ def insert_up(db: DataBase, df: pd.DataFrame):
     columns = ", ".join(df_filtered.columns)
     select_sql = ", ".join(
         [
-            f"{tag} = (SELECT {tag} FROM {temp_table} WHERE up.up_id = {temp_table}.up_id)"
+            f"{tag} = (SELECT {tag} FROM {temp_table} WHERE {table}.up_id = {temp_table}.up_id)"
             for tag in df_filtered.columns
         ]
     )
     sql = f"""
-    UPDATE up
+    UPDATE {table}
     SET {select_sql}
-    WHERE EXISTS (SELECT 1 FROM {temp_table} WHERE up.up_id = {temp_table}.up_id);
+    WHERE EXISTS (SELECT 1 FROM {temp_table} WHERE {table}.up_id = {temp_table}.up_id);
     """
     db.conn.execute(sql)
     sql = f"""
-    INSERT INTO up ({columns})
+    INSERT INTO {table} ({columns})
     SELECT {columns}
     FROM {temp_table}
-    WHERE up_id NOT IN (SELECT up_id FROM up);
+    WHERE up_id NOT IN (SELECT up_id FROM {table});
     """
     db.conn.execute(sql)
     db.conn.execute(f"DROP TABLE {temp_table}")
@@ -120,11 +120,11 @@ def insert_up(db: DataBase, df: pd.DataFrame):
     return True
 
 
-def insert_video(db: DataBase, df: pd.DataFrame):
+def insert_video(db: DataBase, df: pd.DataFrame, table="video"):
     """向video表中插入数据，会自动选择插入哪些字段，不插入哪些字段"""
     if not db.isConnected:
         return False
-    result = db.conn.execute(f"PRAGMA table_info(video)")
+    result = db.conn.execute(f"PRAGMA table_info({table})")
     db_columns = [row[1] for row in result]
     columns_to_write = [col for col in df.columns if col in db_columns]
     df_filtered = df[columns_to_write]
@@ -134,21 +134,21 @@ def insert_video(db: DataBase, df: pd.DataFrame):
     columns = ", ".join(df_filtered.columns)
     select_sql = ", ".join(
         [
-            f"{tag} = (SELECT {tag} FROM {temp_table} WHERE video.v_id = {temp_table}.v_id)"
+            f"{tag} = (SELECT {tag} FROM {temp_table} WHERE {table}.v_id = {temp_table}.v_id)"
             for tag in df_filtered.columns
         ]
     )
     sql = f"""
-    UPDATE video
+    UPDATE {table}
     SET {select_sql}
-    WHERE EXISTS (SELECT 1 FROM {temp_table} WHERE video.v_id = {temp_table}.v_id);
+    WHERE EXISTS (SELECT 1 FROM {temp_table} WHERE {table}.v_id = {temp_table}.v_id);
     """
     db.conn.execute(sql)
     sql = f"""
-    INSERT INTO video ({columns})
+    INSERT INTO {table} ({columns})
     SELECT {columns}
     FROM {temp_table}
-    WHERE v_id NOT IN (SELECT v_id FROM video);
+    WHERE v_id NOT IN (SELECT v_id FROM {table});
     """
     db.conn.execute(sql)
     db.conn.execute(f"DROP TABLE {temp_table}")
@@ -156,13 +156,13 @@ def insert_video(db: DataBase, df: pd.DataFrame):
     return True
 
 
-def insert_up_tag(db: DataBase, up_id: str, tag: str):
+def insert_up_tag(db: DataBase, up_id: str, tag: str, table="up_tag"):
     """插入up_tag表"""
     if not db.isConnected or not up_id or not tag:
         return False
-    sql = f"INSERT INTO up_tag(up_id, tag) VALUES ('{up_id}', '{tag}');"
+    sql = f"INSERT INTO {table}(up_id, tag) VALUES ('{up_id}', '{tag}');"
     db.ExecuteNow(sql)
-    update_one_up_tagtime(db, up_id)
+    update_up_tagtime(db, up_id)
     return True
 
 
@@ -185,13 +185,13 @@ def delete_up(db: DataBase, up_id: str):
     return True
 
 
-def delete_up_tag(db: DataBase, up_id: str, tag: str):
+def delete_up_tag(db: DataBase, up_id: str, tag: str, table="up_tag"):
     """删除up_tag表"""
     if not db.isConnected or not up_id or not tag:
         return False
-    sql = f"DELETE FROM up_tag WHERE up_id='{up_id}' AND tag='{tag}';"
+    sql = f"DELETE FROM {table} WHERE up_id='{up_id}' AND tag='{tag}';"
     db.ExecuteNow(sql)
-    update_one_up_tagtime(db, up_id)
+    update_up_tagtime(db, up_id)
     return True
 
 
@@ -200,6 +200,15 @@ def delete_video_tag(db: DataBase, video_id: str, tag: str):
     if not db.isConnected or video_id == "" or tag == "":
         return False
     sql = f"DELETE FROM video_tag WHERE v_id='{video_id}' AND tag='{tag}';"
+    db.ExecuteNow(sql)
+    return True
+
+
+def delete_allvideo_byupid(db: DataBase, up_id: str, table: str = "video"):
+    """通过给出的up_id删除视频表中对应的视频"""
+    if not db.isConnected or up_id == "" or table == "":
+        return False
+    sql = f"DELETE FROM {table} WHERE up_id = '{up_id}';"
     db.ExecuteNow(sql)
     return True
 
@@ -219,12 +228,12 @@ def update_one_up_exclude(db: DataBase, up_id: str, reason: str, yes_no: bool):
     return True
 
 
-def update_one_up_tagtime(db: DataBase, up_id: str):
+def update_up_tagtime(db: DataBase, up_id: str, table="up"):
     """更新up表tag的更新时间"""
     if not db.isConnected or up_id == "":
         return False
     if exist_up(db, up_id):
-        sql = f"UPDATE up SET tag_time={str(get_timestamp())} WHERE up_id='{up_id}';"
+        sql = f"UPDATE {table} SET tag_time={str(get_timestamp())} WHERE up_id='{up_id}';"
         db.ExecuteNow(sql)
 
 
@@ -274,43 +283,43 @@ def get_all_up_exclude_df(db: DataBase) -> pd.DataFrame:
     return df
 
 
-def get_up_info(db: DataBase, up_id: str) -> pd.DataFrame:
+def get_up_info(db: DataBase, up_id: str, table="up") -> pd.DataFrame:
     """从up表中获取up主信息"""
     df = pd.DataFrame()
     if not db.isConnected or not up_id:
         return df
-    sql = f"SELECT * FROM up WHERE up_id='{up_id}';"
+    sql = f"SELECT * FROM {table} WHERE up_id='{up_id}';"
     df = pd.read_sql_query(sql, db.conn)
     return df
 
 
-def get_video_info(db: DataBase, v_id: str) -> pd.DataFrame:
+def get_video_info(db: DataBase, v_id: str, table="video") -> pd.DataFrame:
     """从video表中获取视频信息"""
     df = pd.DataFrame()
     if not db.isConnected or not v_id:
         return df
-    sql = f"SELECT * FROM video WHERE v_id='{v_id}';"
+    sql = f"SELECT * FROM {table} WHERE v_id='{v_id}';"
     df = pd.read_sql_query(sql, db.conn)
     return df
 
 
-def get_up_selectedtags(db: DataBase, up_id: str) -> list:
+def get_up_selectedtags(db: DataBase, up_id: str, table="up_tag") -> list:
     """获取up_tag表中up选中的tag"""
     ret = []
     if not db.isConnected or up_id == "":
         return ret
-    sql = f"SELECT tag FROM up_tag WHERE up_id='{up_id}';"
+    sql = f"SELECT tag FROM {table} WHERE up_id='{up_id}';"
     ret = [row[0] for row in db.conn.execute(sql).fetchall()]
     ret = sorted(list(set(ret)))
     return ret
 
 
-def get_up_unselectedtags(db: DataBase, up_id: str) -> list:
+def get_up_unselectedtags(db: DataBase, up_id: str, table="up_tag") -> list:
     """获取up_tag表中up未选中的tag"""
     ret = []
     if not db.isConnected or up_id == "":
         return []
-    sql = f"SELECT tag FROM up_tag WHERE tag NOT IN (SELECT tag FROM up_tag WHERE up_id='{up_id}');"
+    sql = f"SELECT tag FROM {table} WHERE tag NOT IN (SELECT tag FROM {table} WHERE up_id='{up_id}');"
     ret = [row[0] for row in db.conn.execute(sql).fetchall()]
     ret = sorted(list(set(ret)))
     return ret
@@ -360,7 +369,7 @@ def get_all_up_id(db: DataBase) -> list:
     return ret
 
 
-def get_all_up_df(db: DataBase) -> pd.DataFrame:
+def get_all_up_info(db: DataBase) -> pd.DataFrame:
     df = pd.DataFrame()
     if not db.isConnected:
         return df
@@ -451,10 +460,12 @@ def search_up_bytags(db: DataBase, tags: list) -> list:
     return list(set(up_ids))
 
 
-def get_allvideo_byupid(db: DataBase, up_id: str) -> pd.DataFrame:
+def get_allvideoinfo_byupid(
+    db: DataBase, up_id: str, table="video"
+) -> pd.DataFrame:
     df = pd.DataFrame()
     if not db.isConnected:
         return df
-    sql = f"SELECT * FROM video WHERE up_id IS '{up_id}';"
+    sql = f"SELECT * FROM {table} WHERE up_id IS '{up_id}';"
     df = pd.read_sql_query(sql, db.conn)
     return df

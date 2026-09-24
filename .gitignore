@@ -2,6 +2,7 @@
 .cache/
 .cookie/
 .dist/
+.download/
 Resource/
 *.pyc
 *.spec

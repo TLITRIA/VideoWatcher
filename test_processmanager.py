@@ -42,8 +42,6 @@ class Test_1(unittest.TestCase):
         df = pd.DataFrame()
         for upid in upids:
             df = pd.concat(
-                [df, get_allvideo_byupid(self.db, upid)], ignore_index=True
+                [df, get_allvideoinfo_byupid(self.db, upid)], ignore_index=True
             )
         # 前台下载
-        
-        
