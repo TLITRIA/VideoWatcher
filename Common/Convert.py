@@ -28,4 +28,3 @@ def biliurl2BV(certain_url):
 
 def BV2url(bv):
     return f"https://www.bilibili.com/video/{bv}"
-

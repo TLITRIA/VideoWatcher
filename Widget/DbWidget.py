@@ -62,12 +62,8 @@ class DbWidget(QWidget, Ui_Form):
             self.flow_layout.addWidget(w)
 
             w.s_toolbar.connect(lambda w: print("toolbar"))
-            w.s_goto_videopage.connect(
-                lambda url: self.wd.Goto(url) if url else None
-            )
-            w.s_goto_upspace.connect(
-                lambda url: self.wd.Goto(url) if url else None
-            )
+            w.s_goto_videopage.connect(lambda url: self.wd.Goto(url) if url else None)
+            w.s_goto_upspace.connect(lambda url: self.wd.Goto(url) if url else None)
             w.s_del_infoW.connect(self.removeFlowLayout)
         self.update_playlist_number()
 
@@ -102,7 +98,7 @@ if __name__ == "__main__":
     wd.Login()
     db = DataBase()
     db.Connect("D:/__Downloads__/videowatcher.db")
-    create_all(db, videowatcher_sqls)
+    create_all(db, default_create_sqls)
 
     w = DbWidget()
     w.show()

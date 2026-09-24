@@ -48,9 +48,7 @@ class MyWebDriver:
     def _generate_driver(self):
         self._option = EdgeOptions()
         self._option.add_experimental_option("useAutomationExtension", False)
-        self._option.add_experimental_option(
-            "excludeSwitches", ["enable-automation"]
-        )
+        self._option.add_experimental_option("excludeSwitches", ["enable-automation"])
         for option in self.selenium_options:
             try:
                 self._option.add_argument(option)
@@ -95,9 +93,7 @@ class MyWebDriver:
         elements = []
         try:
             with timeblock(f"Wait({xp})"):
-                elements = self._driver_wait.until(
-                    EC.presence_of_all_elements_located((By.XPATH, xp))
-                )
+                elements = self._driver_wait.until(EC.presence_of_all_elements_located((By.XPATH, xp)))
         except TimeoutException:
             print(f"超时：未通过 XPath '{xp}' 找到任何元素")
         return elements
@@ -116,12 +112,8 @@ class MyWebDriver:
         before_handles = self._driver.window_handles
         self.ClickNode(node)
         try:
-            self._driver_wait.until(
-                lambda dr: len(dr.window_handles) > len(before_handles)
-            )
-            new_handle = list(
-                set(self._driver.window_handles) - set(before_handles)
-            )[0]
+            self._driver_wait.until(lambda dr: len(dr.window_handles) > len(before_handles))
+            new_handle = list(set(self._driver.window_handles) - set(before_handles))[0]
             self._driver.switch_to.window(new_handle)
             print("转到新窗口")
         except:
@@ -203,12 +195,13 @@ class MyWebDriver:
         强制转到第一个窗口
         """
         print("转到第一个窗口")
-        if (
-            not self._isQuit
-            and hasattr(self, "_driver")
-            and len(self._driver.window_handles)
-        ):
+        if not self._isQuit and hasattr(self, "_driver") and len(self._driver.window_handles):
             self._driver.switch_to.window(self._driver.window_handles[0])
+
+    def setTabPageTitle(self, plainText: str):
+        if self._isQuit or not hasattr(self, "_driver") or self._driver is None:
+            return
+        self._driver.execute_script("document.title = arguments[0];", plainText)
 
 
 def xpath(node: WebElement, xp: str):
@@ -228,9 +221,7 @@ def node_pprint(nodes: list[WebElement]):
     print(f"共{len(nodes)}个结果")
 
 
-def scroll_to_bottommost(
-    wd: MyWebDriver, xp: str, interval=7, maxrets=200, func=None, args=None
-):
+def scroll_to_bottommost(wd: MyWebDriver, xp: str, interval=7, maxrets=200, func=None, args=None):
     last_count = 0
     while last_count != len(wd.xpath_wait(xp)):  # 1 滚动到最低点 即退出
         last_count = len(wd.xpath_findall(xp))

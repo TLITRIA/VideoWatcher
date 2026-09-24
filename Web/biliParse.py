@@ -13,14 +13,7 @@ videoinfo_xpath = '//div[@class="bili-video-card__wrap"]'
 
 
 def if404(wd: MyWebDriver) -> bool:
-    return (
-        len(
-            wd.xpath_wait(
-                '//div[@class="code" and contains(text(), "错误码：-404")]'
-            )
-        )
-        != 0
-    )
+    return len(wd.xpath_wait('//div[@class="code" and contains(text(), "错误码：-404")]')) != 0
 
 
 def parse_videoPage() -> pd.DataFrame:
@@ -68,9 +61,7 @@ def parse_videoPage() -> pd.DataFrame:
         info.append(title)
         columns.append("title")
 
-        node = wd.xpath_wait(
-            "//meta[@data-vue-meta and contains(@content, 'jpg')]"
-        )[0]
+        node = wd.xpath_wait("//meta[@data-vue-meta and contains(@content, 'jpg')]")[0]
         cover = node.get_attribute("content")
         info.append(cover)
         columns.append("cover")
@@ -150,23 +141,17 @@ def parse_videoPage_related() -> pd.DataFrame:
             _node = xpath(node, './/div[@class="info"]/a[@href]')[0]
             href = _node.get_attribute("href")
             if href:
-                match = re.match(
-                    r"https://www.bilibili.com/video/([0-9a-zA-Z]*)/.*", href
-                )
+                match = re.match(r"https://www.bilibili.com/video/([0-9a-zA-Z]*)/.*", href)
                 if match:
                     v_id = match.group(1)
                     if v_id:
                         info.append(v_id)
                         columns.append("v_id")
 
-            _node = xpath(
-                node, './/div[@class="info"]/div[@class="upname"]/a[@href]'
-            )[0]
+            _node = xpath(node, './/div[@class="info"]/div[@class="upname"]/a[@href]')[0]
             space = _node.get_attribute("href")
             if space:
-                match = re.match(
-                    r"https://space.bilibili.com/([0-9]*)/.*", space
-                )
+                match = re.match(r"https://space.bilibili.com/([0-9]*)/.*", space)
                 if match:
                     up_id = match.group(1)
                     if up_id:
@@ -216,9 +201,7 @@ def parse_spacePage(wd=None) -> pd.DataFrame:
     columns = []
     time.sleep(5)
     wd.xpath_wait(videoinfo_xpath)
-    wd.xpath_wait(
-        "//div[@class='b-avatar__layer__res']//source[@type='image/webp' and @srcset]"
-    )
+    wd.xpath_wait("//div[@class='b-avatar__layer__res']//source[@type='image/webp' and @srcset]")
     try:
         data_time = get_timestamp()
         info.append(data_time)
@@ -232,21 +215,19 @@ def parse_spacePage(wd=None) -> pd.DataFrame:
             print("未访问空间视频页")
             return df
 
-        up_name = wd.xpath_findall('//div[@class="nickname"]')[0].get_attribute(
-            "textContent"
-        )
+        url = f"https://space.bilibili.com/{up_id}/upload/video"
+        info.append(url)
+        columns.append("url")
+
+        up_name = wd.xpath_findall('//div[@class="nickname"]')[0].get_attribute("textContent")
         info.append(up_name)
         columns.append("up_name")
 
-        intro = wd.xpath_findall('//div[@class="pure-text" and @title]')[
-            0
-        ].get_attribute("title")
+        intro = wd.xpath_findall('//div[@class="pure-text" and @title]')[0].get_attribute("title")
         info.append(intro)
         columns.append("intro")
 
-        up_sum_string = wd.xpath_findall("//div[@class='side-nav__item__sub']")[
-            0
-        ].text
+        up_sum_string = wd.xpath_findall("//div[@class='side-nav__item__sub']")[0].text
         try:
             up_sum = int(up_sum_string.split(" ")[0])
         except:
@@ -254,9 +235,7 @@ def parse_spacePage(wd=None) -> pd.DataFrame:
         info.append(up_sum)
         columns.append("up_sum")
 
-        facenodes = wd.xpath_wait(
-            "//div[@class='b-avatar__layer__res']//source[@type='image/webp' and @srcset]"
-        )
+        facenodes = wd.xpath_wait("//div[@class='b-avatar__layer__res']//source[@type='image/webp' and @srcset]")
         if len(facenodes):
             face = facenodes[0].get_attribute("srcset")
             if face:
@@ -266,21 +245,12 @@ def parse_spacePage(wd=None) -> pd.DataFrame:
             columns.append("face")
 
         nodes = wd.xpath_findall(videoinfo_xpath)
-        # upload_lasttitle = xpath(
-        #     nodes[0], './/div[@class="bili-video-card__title"]'
-        # )[0].get_attribute("title")
-        # info.append(upload_lasttitle)
-        # columns.append("upload_lasttitle")
 
-        up_last_vid = biliurl2BV(
-            xpath(nodes[0], "./div/div/a")[0].get_attribute("href")
-        )
+        up_last_vid = biliurl2BV(xpath(nodes[0], "./div/div/a")[0].get_attribute("href"))
         info.append(up_last_vid)
         columns.append("up_last_vid")
 
-        date_string = xpath(
-            nodes[0], './/div[@class="bili-video-card__subtitle"]'
-        )[0].get_attribute("textContent")
+        date_string = xpath(nodes[0], './/div[@class="bili-video-card__subtitle"]')[0].get_attribute("textContent")
         # date_stamp = bili_datestringParse(date_string)
         info.append(date_string)
         columns.append("up_last_time")
@@ -291,7 +261,6 @@ def parse_spacePage(wd=None) -> pd.DataFrame:
         traceback.print_exc()
         print("+" * 80)
     df = pd.DataFrame([info], columns=columns)
-    # print(df)
     return df
 
 
@@ -302,7 +271,7 @@ def back_update_up(urls: list):
     if len(urls) == 0:
         return
     db = DataBase()
-    db.Connect(videowatcher_sql_fp)
+    # db.Connect(videowatcher_sql_fp) TODO
 
     wd = MyWebDriver()
     wd.selenium_options.append("--force-dark-mode")
@@ -328,7 +297,7 @@ def back_update_video(urls: list):
     if len(urls) == 0:
         return
     db = DataBase()
-    db.Connect(videowatcher_sql_fp)
+    # db.Connect(videowatcher_sql_fp) # TODO
 
     wd = MyWebDriver()
     wd.selenium_options.append("--force-dark-mode")
@@ -347,25 +316,23 @@ def back_update_video(urls: list):
             pass
         print(f"{index+1} / {len(urls)} : {url}")
         print(f"该up缺少的视频数量为{maxresult}, 抓取指定数量的视频")
-        df = parse_multi_back_playlistPage(wd, maxresult)
-        insert_video(db, df)
-        if (
-            get_len_missingvideo(db, up_id) > 0
-        ):  # 出现这种情况意味着可能中间有视频未抓取或者失效，需要完整地爬取
+        insert_video(db, parse_multi_back_playlistPage(wd, maxresult))
+        if get_len_missingvideo(db, up_id) > 0:  # 出现这种情况意味着可能中间有视频未抓取或者失效，需要完整地爬取
             print(f"up主 {url} 的视频没有全部抓取到")
             # TODO 清空该up的视频
             wd.Goto(url)
             time.sleep(1)
-            df = parse_multi_back_playlistPage(wd)
-            insert_video(db, df)
+            insert_video(db, parse_multi_back_playlistPage(wd))
     wd.Quit()
 
 
 def back_update_all(urls: list, db_fp: str):
     if len(urls) == 0:
         return
+
     db = DataBase()
-    db.Connect(db_fp)
+    if not db.isConnected:
+        db.Connect(db_fp)
 
     wd = MyWebDriver()
     wd.selenium_options.append("--force-dark-mode")
@@ -374,34 +341,30 @@ def back_update_all(urls: list, db_fp: str):
     wd._driver.minimize_window()
 
     for index, url in enumerate(urls):
+        print("\n\n" + "=" * 80 + "\n")
+        print(f"{index+1} / {len(urls)} : {url}")
         wd.Goto(url)
         time.sleep(3)
-        wd._driver.execute_script(
-            "document.title = arguments[0];",
-            f"{index+1} / {len(urls)} " + wd._driver.title,
-        )
+        wd.setTabPageTitle(f"{index+1} / {len(urls)} " + wd._driver.title)
         wd.xpath_wait(videoinfo_xpath)
         insert_up(db, parse_spacePage(wd))
 
-        maxresult = 0
         up_id = str(match_upspace(wd._driver.current_url))
-        try:
-            maxresult = get_len_missingvideo(db, up_id)
-        except:
-            pass
-        print(f"{index+1} / {len(urls)} : {url}")
+        maxresult = get_len_missingvideo(db, up_id)
         print(f"该up缺少的视频数量为{maxresult}, 抓取指定数量的视频")
-        df = parse_multi_back_playlistPage(wd, maxresult)
-        insert_video(db, df)
-        if (
-            get_len_missingvideo(db, up_id) > 0
-        ):  # 出现这种情况意味着可能中间有视频未抓取或者失效，需要完整地爬取
-            print(f"up主 {url} 的视频没有全部抓取到")
+        insert_video(db, parse_multi_back_playlistPage(wd, maxresult))
+        print(f"该up视频总数为\t\t\t\t{int(get_up_info(db, up_id).iloc[0]['up_sum'])}")
+        print(f"按照缺失数爬取前n个视频后总数为\t{len(get_allvideoinfo_byupid(db, up_id))}")
+        for i in range(3): # TODO magic 3
+            if judge_bilibiliUP_needupdate(db, up_id) == 0:
+                break
+            print(f"up主 {url} 的视频重新爬取")
             delete_allvideo_byupid(db, up_id)
-            wd.Goto(url)
+            wd._driver.refresh()
             time.sleep(1)
-            df = parse_multi_back_playlistPage(wd)
-            insert_video(db, df)
+            wd.setTabPageTitle(f"{index+1} / {len(urls)} " + wd._driver.title)
+            insert_video(db, parse_multi_back_playlistPage(wd))
+            print(f"再次爬取后数据库总数{len(get_allvideoinfo_byupid(db, up_id))}")
 
     wd.Quit()
     db.Disconnect()

@@ -5,14 +5,14 @@ from DataAccess.sql_query import *
 ytb_create_sqls = [
     """
 CREATE TABLE IF NOT EXISTS ytbup(
-    up_id TEXT, -- up主id 值得注意的是油管id已经有辨识度了
+    up_id TEXT, -- up主id 值得注意的是油管id已经很有辨识度了
     up_name TEXT, -- up主名称
     url TEXT, -- 前往主页
     face TEXT, -- up主头像
     data_time INT, -- 数据更新时间
     tag_time INT, -- tag更新时间
     PRIMARY KEY (up_id)
-);""",  # TODO url
+);""",
     """
 CREATE TABLE IF NOT EXISTS ytbup_tag(
     up_id TEXT NOT NULL, -- up主id号
@@ -36,7 +36,6 @@ CREATE TABLE IF NOT EXISTS ytbvideo(
     PRIMARY KEY (v_id)
 );""",
     # 注意该表存放的是广义上的视频：直播/短视频/视频都视为视频
-    # TODO url
     # 不搞视频tag表，而是在浏览时直接下载
     # 不搞排除表
 ]
@@ -100,7 +99,7 @@ def ytb_get_allvideoinfo_byupid(db: DataBase, up_id: str) -> pd.DataFrame:
     return get_allvideoinfo_byupid(db, up_id)
 
 
-# 现在暂时不知道油管主页上视频数具体是哪些的和，
+# 现在暂时不知道油管主页上视频数具体是哪些的和，部分函数无法使用。例如
 # def ytb_get_upid_isnotnew(db:DataBase)->list:
-#     """获取ytbup表中缺少最新video的up_id"""
+#     """获取ytbup表中缺少最新video的up主的id"""
 #     return []

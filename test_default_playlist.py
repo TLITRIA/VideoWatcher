@@ -43,7 +43,7 @@ class TestRunWithoutError(unittest.TestCase):
 
         cls.db = DataBase()
         cls.db.Connect(videowatcher_sql_fp)
-        create_all(cls.db, videowatcher_sqls)
+        create_all(cls.db, default_create_sqls)
 
     @classmethod
     def tearDownClass(cls):
@@ -67,9 +67,7 @@ class TestRunWithoutError(unittest.TestCase):
             w.close()
             self.app.processEvents()  #
         except Exception:
-            self.fail(
-                f"test_default_playlist_uncollect 执行异常:\n{traceback.format_exc()}"
-            )
+            self.fail(f"test_default_playlist_uncollect 执行异常:\n{traceback.format_exc()}")
 
 
 class Test_function(unittest.TestCase):
@@ -98,7 +96,7 @@ class Test_function(unittest.TestCase):
 
         cls.db = DataBase()
         cls.db.Connect(videowatcher_sql_fp)
-        create_all(cls.db, videowatcher_sqls)
+        create_all(cls.db, default_create_sqls)
 
     @classmethod
     def tearDownClass(cls):

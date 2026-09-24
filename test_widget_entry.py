@@ -9,6 +9,7 @@ from DataAccess.DataBase import *
 from DataAccess.sql_query import *
 from Common.Logger import *
 
+
 class TestRunWithoutError(unittest.TestCase):
     """测试entryWidget"""
 
@@ -26,12 +27,12 @@ class TestRunWithoutError(unittest.TestCase):
         print("初始化测试类")
         cls.app = QApplication(sys.argv)
         cls.wd = MyWebDriver()
-        cls.wd.selenium_options.append('--force-dark-mode')
-        cls.wd.selenium_options.append('--mute-audio')
+        cls.wd.selenium_options.append("--force-dark-mode")
+        cls.wd.selenium_options.append("--mute-audio")
         cls.wd.Login()
         cls.db = DataBase()
         cls.db.Connect()
-        create_all(cls.db, videowatcher_sqls)
+        create_all(cls.db, default_create_sqls)
 
     @classmethod
     def tearDownClass(cls):
@@ -47,8 +48,10 @@ class TestRunWithoutError(unittest.TestCase):
         w.show()
         with timeblock():
             """bilibili 视频播放页"""
-            self.wd.Goto("https://www.bilibili.com/video/BV15cuV6pEnY/?spm_id_from=333.1007.tianma.1-1-1.click&vd_source=eb37b7b47eaa888d1299c60038fb6205")
-            w.focus() # 或者点击按钮
+            self.wd.Goto(
+                "https://www.bilibili.com/video/BV15cuV6pEnY/?spm_id_from=333.1007.tianma.1-1-1.click&vd_source=eb37b7b47eaa888d1299c60038fb6205"
+            )
+            w.focus()  # 或者点击按钮
         with timeblock():
             """bilibili up主视频发布页"""
             self.wd.Goto("https://space.bilibili.com/583393248/upload/video")
@@ -59,7 +62,6 @@ class TestRunWithoutError(unittest.TestCase):
             w.focus()
         self.app.processEvents()
 
-        
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

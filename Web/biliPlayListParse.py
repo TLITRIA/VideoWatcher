@@ -36,15 +36,11 @@ def parse_current_playlistPage(wd=None) -> pd.DataFrame:
     fold_name = "默认收藏夹"
     match = re.match(r".*fid=([0-9]*)&ftype=create", wd._driver.current_url)
     if match:
-        fold_nodes = wd.xpath_findall(
-            f'//div[@class="fav-sidebar-item" and @id="{match.group(1)}"]'
-        )
+        fold_nodes = wd.xpath_findall(f'//div[@class="fav-sidebar-item" and @id="{match.group(1)}"]')
         if len(fold_nodes):
             fold_name = fold_nodes[0].get_attribute("title")
 
-    for index, node in enumerate(
-        nodes
-    ):  # //div[@class="bili-video-card__wrap"]
+    for index, node in enumerate(nodes):  # //div[@class="bili-video-card__wrap"]
         # with timeblock(f"step3: parse {index} node"):
         try:
             tmp_df = pd.DataFrame()
@@ -54,9 +50,7 @@ def parse_current_playlistPage(wd=None) -> pd.DataFrame:
             _node = xpath(node, './/a[@class="bili-cover-card"]')[0]
             href = _node.get_attribute("href")
             if href:
-                match = re.match(
-                    r"https://www.bilibili.com/video/([0-9a-zA-Z]*).*", href
-                )
+                match = re.match(r"https://www.bilibili.com/video/([0-9a-zA-Z]*).*", href)
                 if match:
                     v_id = match.group(1)
                     info.append(v_id)
@@ -65,25 +59,19 @@ def parse_current_playlistPage(wd=None) -> pd.DataFrame:
             _node = xpath(node, './/a[@class="bili-video-card__author"]')[0]
             href = _node.get_attribute("href")
             if href:
-                match = re.match(
-                    r"https://space.bilibili.com/([0-9a-zA-Z]*).*", href
-                )
+                match = re.match(r"https://space.bilibili.com/([0-9a-zA-Z]*).*", href)
                 if match:
                     up_id = match.group(1)
                     info.append(up_id)
                     columns.append("up_id")
-            _node = xpath(node, './/div[@class="bili-video-card__text"]/span')[
-                -1
-            ]
+            _node = xpath(node, './/div[@class="bili-video-card__text"]/span')[-1]
             up_name = _node.text
             if up_name:
                 up_name = up_name.split(" · ")[0]
                 info.append(up_name)
                 columns.append("up_name")
 
-            _node = xpath(
-                node, './/div[@class="bili-cover-card__thumbnail"]/img'
-            )[0]
+            _node = xpath(node, './/div[@class="bili-cover-card__thumbnail"]/img')[0]
             cover = _node.get_attribute("src")
             if cover:
                 cover = cover.split("@")[0]
@@ -127,7 +115,7 @@ def parse_other_playlistPage(wd=None) -> pd.DataFrame:
             print("页面解析失败，疑似404")
             return df
 
-    time.sleep(3) # TODO 固定延时能不能缩短
+    time.sleep(3)  # TODO 固定延时能不能缩短
     # wd.xpath_wait('//a[@target="_blank"]')
     # wd.xpath_wait('//div[@class="bili-video-card__title"]')
     # wd.xpath_wait("//img")
@@ -136,9 +124,7 @@ def parse_other_playlistPage(wd=None) -> pd.DataFrame:
 
     nodes = wd.xpath_wait(videoinfo_xpath)
     up_id = match_upspace(wd._driver.current_url)
-    for index, node in enumerate(
-        nodes
-    ):  # //div[@class="bili-video-card__wrap"]
+    for index, node in enumerate(nodes):  # //div[@class="bili-video-card__wrap"]
         try:
             tmp_df = pd.DataFrame()
             info = []
@@ -146,20 +132,20 @@ def parse_other_playlistPage(wd=None) -> pd.DataFrame:
             _node = xpath(node, './/a[@target="_blank" and @href]')[0]
             href = _node.get_attribute("href")
             if href:
-                match = re.match(
-                    r"https://www.bilibili.com/video/([0-9a-zA-Z]*).*", href
-                )
+                match = re.match(r"https://www.bilibili.com/video/([0-9a-zA-Z]*).*", href)
                 if match:
                     v_id = match.group(1)
                     info.append(v_id)
                     columns.append("v_id")
 
+                    url = f"https://www.bilibili.com/video/{v_id}"
+                    info.append(url)
+                    columns.append("url")
+
             info.append(up_id)
             columns.append("up_id")
 
-            title = xpath(node, './/div[@class="bili-video-card__title"]')[
-                0
-            ].get_attribute("title")
+            title = xpath(node, './/div[@class="bili-video-card__title"]')[0].get_attribute("title")
             info.append(title)
             columns.append("title")
 
@@ -173,20 +159,18 @@ def parse_other_playlistPage(wd=None) -> pd.DataFrame:
             info.append(cover)
             columns.append("cover")
 
-            upload = xpath(node, './/div[@class="bili-video-card__subtitle"]')[
-                0
-            ].get_attribute("textContent")
+            upload = xpath(node, './/div[@class="bili-video-card__subtitle"]')[0].get_attribute("textContent")
             info.append(upload)
             columns.append("upload")
 
-            pN, cN, dN = xpath(
-                node, './/div/div[@class="bili-cover-card__stat"]'
-            )
+            pN, cN, dN = xpath(node, './/div/div[@class="bili-cover-card__stat"]')
             play = pN.get_attribute("textContent")
             if play:
                 if "万" in play:
                     num = float(play.split("万")[0])
                     play = int(num * 1000)
+                elif play == "NaN":
+                    play = 0
                 else:
                     play = int(play)
             danmu = cN.get_attribute("textContent")
@@ -205,21 +189,13 @@ def parse_other_playlistPage(wd=None) -> pd.DataFrame:
             if dt:
                 dt = dt.strip()
                 if len(dt) == 5:
-                    duration = int(dt.split(":")[0]) * 60 + int(
-                        dt.split(":")[1]
-                    )
+                    duration = int(dt.split(":")[0]) * 60 + int(dt.split(":")[1])
                 elif len(dt) == 8:
-                    duration = (
-                        int(dt.split(":")[0]) * 3600
-                        + int(dt.split(":")[1]) * 60
-                        + int(dt.split(":")[2])
-                    )
+                    duration = int(dt.split(":")[0]) * 3600 + int(dt.split(":")[1]) * 60 + int(dt.split(":")[2])
             info.extend([play, danmu, duration])
             columns.extend(["play", "danmu", "duration"])
 
-            info.append(
-                1 if "充电专属" in str(node.get_attribute("textContent")) else 0
-            )
+            info.append(1 if "充电专属" in str(node.get_attribute("textContent")) else 0)
             columns.append("isCharge")
 
             data_time = get_timestamp()
@@ -274,9 +250,7 @@ def df_intersect(df1: pd.DataFrame, df2: pd.DataFrame) -> bool:
         return len(common_set) > 0
 
 
-def parse_multi_playlistPage(
-    wd=None, maxresult=200
-) -> pd.DataFrame:  # 默认读取少量信息
+def parse_multi_playlistPage(wd=None, maxresult=200) -> pd.DataFrame:  # 默认读取少量信息
     """
     解析B站收藏夹列表
     :return: DataFrame

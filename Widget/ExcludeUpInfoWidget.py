@@ -9,6 +9,7 @@ from DataAccess.DataBase import *
 from DataAccess.sql_query import *
 from Common.PyQt import register_webImg
 
+
 class ExcludeUpInfoWidget(QWidget, Ui_Form):
     isDeleted: bool
     isBlocked: bool
@@ -26,6 +27,7 @@ class ExcludeUpInfoWidget(QWidget, Ui_Form):
                 self._up_id,
                 self.plainTextEdit.toPlainText(),
                 state == Qt.CheckState.Checked,
+                f"https://space.bilibili.com/{self._up_id}/upload/video",
             )
             if state == Qt.CheckState.PartiallyChecked:
                 insert_up_null(self.db, self._up_id)
@@ -41,6 +43,7 @@ class ExcludeUpInfoWidget(QWidget, Ui_Form):
                 self._up_id,
                 self.plainTextEdit.toPlainText(),
                 self.cb_upselect.checkState() == Qt.CheckState.Checked,
+                f"https://space.bilibili.com/{self._up_id}/upload/video",
             )
 
     def __init__(self, parent=None):
@@ -51,9 +54,7 @@ class ExcludeUpInfoWidget(QWidget, Ui_Form):
         self.db = DataBase()
         self.but_gospace.clicked.connect(
             lambda _: (
-                self.s_goto_upspace.emit(
-                    f"https://space.bilibili.com/{self._up_id}/upload/video"
-                )
+                self.s_goto_upspace.emit(f"https://space.bilibili.com/{self._up_id}/upload/video")
                 if self._up_id is not None
                 else None
             )
@@ -73,11 +74,7 @@ class ExcludeUpInfoWidget(QWidget, Ui_Form):
 
         self.isBlocked = True
         self.plainTextEdit.setPlainText(str(series["reason"]))
-        state = (
-            Qt.CheckState.Checked
-            if int(series["yes_no"]) == 1
-            else Qt.CheckState.PartiallyChecked
-        )
+        state = Qt.CheckState.Checked if int(series["yes_no"]) == 1 else Qt.CheckState.PartiallyChecked
         self.cb_upselect.setCheckState(state)
         self.isBlocked = False
 
@@ -85,14 +82,14 @@ class ExcludeUpInfoWidget(QWidget, Ui_Form):
         updf = get_up_info(self.db, self._up_id)
         if len(updf) != 1:
             self.cb_upselect.setText(self._up_id)
-            self.up_face.setText('None')            
+            self.up_face.setText("None")
         else:
             up_series = updf.iloc[0]
             if "up_name" in up_series.index.tolist():
                 self.cb_upselect.setText(str(up_series["up_name"]))
             if "face" in up_series.index.tolist():
-                if str(up_series['face']) != '':
-                    register_webImg(self.up_face, str(up_series['face']))
+                if str(up_series["face"]) != "":
+                    register_webImg(self.up_face, str(up_series["face"]))
 
 
 if __name__ == "__main__":
@@ -106,15 +103,11 @@ if __name__ == "__main__":
     wd.Login()
     db = DataBase()
     db.Connect("D:/__Downloads__/videowatcher.db")
-    create_all(db, videowatcher_sqls)
+    create_all(db, default_create_sqls)
 
     w = ExcludeUpInfoWidget()
     w.but_gospace.clicked.connect(
-        lambda _: (
-            wd.Goto(f"https://space.bilibili.com/{w._up_id}/upload/video")
-            if w._up_id is not None
-            else None
-        )
+        lambda _: (wd.Goto(f"https://space.bilibili.com/{w._up_id}/upload/video") if w._up_id is not None else None)
     )
     w.show()
     df = get_all_up_exclude_df(db)

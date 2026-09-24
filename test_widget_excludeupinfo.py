@@ -32,7 +32,7 @@ class TestRunWithoutError(unittest.TestCase):
         cls.wd.Login()
         cls.db = DataBase()
         cls.db.Connect("D:/__Downloads__/videowatcher.db")
-        create_all(cls.db, videowatcher_sqls)
+        create_all(cls.db, default_create_sqls)
 
     @classmethod
     def tearDownClass(cls):
@@ -53,6 +53,4 @@ class TestRunWithoutError(unittest.TestCase):
             w.series_update_all(df.iloc[0])
             self.app.processEvents()
         except Exception:
-            self.fail(
-                f"test_first_up_in_excludeup 执行异常:\n{traceback.format_exc()}"
-            )
+            self.fail(f"test_first_up_in_excludeup 执行异常:\n{traceback.format_exc()}")

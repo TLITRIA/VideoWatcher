@@ -6,15 +6,15 @@ from PyQt6.QtCore import Qt
 
 """
 数据库操作语句
-设想中B站和油管都要求有同样的数据
 """
 videowatcher_sql_fp = abspath(R"./.cache/db/videowatcher.db")
-videowatcher_sqls = [
+default_create_sqls = [
     """
 CREATE TABLE IF NOT EXISTS up(
     up_id TEXT,
     up_name TEXT, -- up主名字
     intro TEXT, -- up主页简介
+    url TEXT, -- up视频页链接
     face TEXT, -- up主头像链接
     up_sum INT, -- up视频总数
     up_last_vid TEXT, -- 最近更新视频id
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS up(
     data_time INT, -- 数据更新时间
     tag_time INT, -- tag更新时间
     PRIMARY KEY (up_id)
-);""",  # TODO url
+);""",
     """
 CREATE TABLE IF NOT EXISTS up_tag(
     up_id TEXT NOT NULL, -- up主id号
@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS video(
     v_id TEXT , -- 视频id号
     up_id TEXT, -- up主id号
     title TEXT, -- 视频标题
+    url TEXT, -- 视频链接
     cover TEXT, -- 视频封面链接
     upload TEXT, -- 视频上传时间
     play INT, -- 播放量
@@ -43,7 +44,7 @@ CREATE TABLE IF NOT EXISTS video(
     data_time INT, -- 数据更新时间
     tag_time INT, -- tag更新时间
     PRIMARY KEY (v_id)
-);""",  # TODO url
+);""",
     """
 CREATE TABLE IF NOT EXISTS video_tag(
     v_id TEXT NOT NULL, -- 视频id号
@@ -53,10 +54,11 @@ CREATE TABLE IF NOT EXISTS video_tag(
     """
 CREATE TABLE IF NOT EXISTS up_exclude(
     up_id TEXT NOT NULL, -- up主id号
+    url TEXT, -- up视频页链接
     reason TEXT, -- 排除原因
     yes_no INT, -- 是否排除 1是 0否
     PRIMARY KEY (up_id)
-);""",  # TODO url
+);""",
 ]
 
 
@@ -117,6 +119,15 @@ def insert_up(db: DataBase, df: pd.DataFrame, table="up"):
     db.conn.execute(sql)
     db.conn.execute(f"DROP TABLE {temp_table}")
     db.conn.commit()
+    # print(f"插入表格{table}:\n{df}")
+    # with pd.option_context(
+    #     # "display.max_rows",        None,  # 显示所有行
+    #     "display.max_columns",
+    #     None,  # 显示所有列
+    #     "display.width",
+    #     None,  # 自动适应终端宽度，避免换行错乱
+    # ):
+    #     print(df[["up_id", "data_time"]])  # 注意方括号数目
     return True
 
 
@@ -153,6 +164,15 @@ def insert_video(db: DataBase, df: pd.DataFrame, table="video"):
     db.conn.execute(sql)
     db.conn.execute(f"DROP TABLE {temp_table}")
     db.conn.commit()
+    # print(f"插入表格{table}:\n{df}")
+    # with pd.option_context(
+    #     # 'display.max_rows', None,      # 显示所有行
+    #     "display.max_columns",
+    #     None,  # 显示所有列
+    #     "display.width",
+    #     None,  # 自动适应终端宽度，避免换行错乱
+    # ):
+    #     print(df[["v_id", "data_time"]])  # 注意方括号数目
     return True
 
 
@@ -212,8 +232,9 @@ def delete_allvideo_byupid(db: DataBase, up_id: str, table: str = "video"):
     db.ExecuteNow(sql)
     return True
 
+
 # ============================================================ #
-def update_one_up_exclude(db: DataBase, up_id: str, reason: str, yes_no: bool):
+def update_one_up_exclude(db: DataBase, up_id: str, reason: str, yes_no: bool, url: str = ""):
     """更新up_exclude表，会自动创建记录"""
     if not db.isConnected or not up_id:
         return False
@@ -223,7 +244,7 @@ def update_one_up_exclude(db: DataBase, up_id: str, reason: str, yes_no: bool):
         sql = f"UPDATE up_exclude SET reason='{reason}', yes_no={val} WHERE up_id='{up_id}';"
         db.ExecuteNow(sql)
     else:
-        sql = f"INSERT INTO up_exclude(up_id, reason, yes_no) VALUES ('{up_id}', '{reason}', {val});"
+        sql = f"INSERT INTO up_exclude(up_id, url, reason, yes_no) VALUES ('{up_id}','{url}','{reason}', {val});"
         db.ExecuteNow(sql)
     return True
 
@@ -378,6 +399,15 @@ def get_all_up_info(db: DataBase) -> pd.DataFrame:
     return df
 
 
+def get_all_video_info(db: DataBase, table: str = "video") -> pd.DataFrame:
+    df = pd.DataFrame()
+    if not db.isConnected:
+        return df
+    sql = f"SELECT * FROM {table};"
+    df = pd.read_sql_query(sql, db.conn)
+    return df
+
+
 def get_upexclude_up_fullinfo(db: DataBase) -> pd.DataFrame:
     """搜索所有排除的up并从up表中查询信息"""
     df = pd.DataFrame()
@@ -453,19 +483,29 @@ def search_up_bytags(db: DataBase, tags: list) -> list:
         return []
     for tag in tags:
         sql = f"SELECT up_id FROM up_tag WHERE tag IS '{tag}';"
-        tmp_ids = [
-            row[0] for row in db.conn.execute(sql).fetchall() if row[0] != ""
-        ]
+        tmp_ids = [row[0] for row in db.conn.execute(sql).fetchall() if row[0] != ""]
         up_ids.extend(tmp_ids)
     return list(set(up_ids))
 
 
-def get_allvideoinfo_byupid(
-    db: DataBase, up_id: str, table="video"
-) -> pd.DataFrame:
+def get_allvideoinfo_byupid(db: DataBase, up_id: str, table="video") -> pd.DataFrame:
     df = pd.DataFrame()
     if not db.isConnected:
         return df
     sql = f"SELECT * FROM {table} WHERE up_id IS '{up_id}';"
     df = pd.read_sql_query(sql, db.conn)
     return df
+
+
+def judge_bilibiliUP_needupdate(db: DataBase, up_id: str) -> int:
+    df = get_up_info(db, up_id, "up")
+    if len(df) != 1:
+        return -1
+    series = df.iloc[0]
+    if int(series["data_time"]) < get_timestamp() - 60 * 60 * 24:  # 24h未更新
+        return 1
+    if abs(int(series["up_sum"]) - len(get_allvideoinfo_byupid(db, series["up_id"]))) > 10:  # 总数与数据库相差过大
+        return 2
+    if len(get_video_info(db, str(series["up_last_vid"]))) == 0:  # 最新视频不在数据库中
+        return 3
+    return 0

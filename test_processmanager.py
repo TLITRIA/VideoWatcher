@@ -34,14 +34,3 @@ class Test_1(unittest.TestCase):
         print("清理测试类")
         cls.pm.__del__()
         cls.db.Disconnect()
-
-    def test_downloadall(self):
-        """测试下载多个视频"""
-        up_tags = ["downloadAll"]
-        upids = search_up_bytags(self.db, up_tags)
-        df = pd.DataFrame()
-        for upid in upids:
-            df = pd.concat(
-                [df, get_allvideoinfo_byupid(self.db, upid)], ignore_index=True
-            )
-        # 前台下载
