@@ -4,7 +4,7 @@ import unittest
 import sys
 import traceback
 from Common.Process import *
-
+from Common.Abspath import *
 from DataAccess.DataBase import *
 from DataAccess.sql_query import *
 import pandas as pd
@@ -26,7 +26,7 @@ class Test_1(unittest.TestCase):
         cls.pm = ProcessManager()
         cls.pm.StartWorkers(3)
         cls.db = DataBase()
-        cls.db.Connect("D:/__Downloads__/videowatcher.db")
+        cls.db.Connect(test_db_fp)
 
     @classmethod
     def tearDownClass(cls):

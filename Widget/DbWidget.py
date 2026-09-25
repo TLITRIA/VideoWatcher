@@ -39,8 +39,7 @@ class DbWidget(QWidget, Ui_Form):
 
     def on_click_bili_up(self):
         self.FlowlayoutClear()
-        df = get_all_up_info(self.__db)
-        self.AddInfoWidgets(df)
+        self.AddInfoWidgets(get_whole_table(self.__db, 'up'))
 
     def __init__(self, parent=None):
         super(DbWidget, self).__init__()
@@ -97,7 +96,7 @@ if __name__ == "__main__":
     wd.selenium_options.append("--mute-audio")
     wd.Login()
     db = DataBase()
-    db.Connect("D:/__Downloads__/videowatcher.db")
+    db.Connect(test_db_fp)
     create_all(db, default_create_sqls)
 
     w = DbWidget()

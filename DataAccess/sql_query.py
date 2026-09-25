@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS up(
     face TEXT, -- up主头像链接
     up_sum INT, -- up视频总数
     up_last_vid TEXT, -- 最近更新视频id
-    up_last_time TEXT, -- 最近更新视频时间
+    up_last_time INT, -- 最近更新视频时间
     data_time INT, -- 数据更新时间
     tag_time INT, -- tag更新时间
     PRIMARY KEY (up_id)
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS video(
     title TEXT, -- 视频标题
     url TEXT, -- 视频链接
     cover TEXT, -- 视频封面链接
-    upload TEXT, -- 视频上传时间
+    upload INT, -- 视频上传时间
     play INT, -- 播放量
     danmu INT, -- 弹幕数
     duration INT, -- 视频时长
@@ -121,7 +121,8 @@ def insert_up(db: DataBase, df: pd.DataFrame, table="up"):
     db.conn.commit()
     # print(f"插入表格{table}:\n{df}")
     # with pd.option_context(
-    #     # "display.max_rows",        None,  # 显示所有行
+    #     "display.max_rows",
+    #     None,  # 显示所有行
     #     "display.max_columns",
     #     None,  # 显示所有列
     #     "display.width",
@@ -195,6 +196,14 @@ def insert_video_tag(db: DataBase, video_id: str, tag: str):
     return True
 
 
+def rebuild_table(db: DataBase, df: pd.DataFrame, table: str):
+    """重建表格"""
+    if not db.isConnected or df.empty:
+        return False
+    df.to_sql(table, db.conn, if_exists="replace", index=False)
+    return True
+
+
 # ============================================================ #
 def delete_up(db: DataBase, up_id: str):
     """从up表删除记录"""
@@ -241,7 +250,7 @@ def update_one_up_exclude(db: DataBase, up_id: str, reason: str, yes_no: bool, u
     val = 1 if yes_no else 0
     sql = f"SELECT * FROM up_exclude WHERE up_id='{up_id}';"  # check if up_id exists
     if db.conn.execute(sql).fetchone() is not None:
-        sql = f"UPDATE up_exclude SET reason='{reason}', yes_no={val} WHERE up_id='{up_id}';"
+        sql = f"UPDATE up_exclude SET reason='{reason}', yes_no={val}, url='{url}' WHERE up_id='{up_id}';"
         db.ExecuteNow(sql)
     else:
         sql = f"INSERT INTO up_exclude(up_id, url, reason, yes_no) VALUES ('{up_id}','{url}','{reason}', {val});"
@@ -380,33 +389,24 @@ def get_up_unfilled(db: DataBase) -> list:
     return ret
 
 
-def get_all_up_id(db: DataBase) -> list:
+def get_all_up_id(db: DataBase, table="up") -> list:
     """获取up表中所有up_id"""
     ret = []
     if not db.isConnected:
         return []
-    sql = "SELECT up_id FROM up ORDER BY data_time;"  # 按照更新时间从前往后
+    sql = f"SELECT up_id FROM {table} ORDER BY data_time;"  # 按照更新时间从前往后
     ret = [row[0] for row in db.conn.execute(sql).fetchall() if row[0] != ""]
     return ret
 
 
-def get_all_up_info(db: DataBase) -> pd.DataFrame:
+def get_whole_table(db: DataBase, table: str) -> pd.DataFrame:
+    """获取整个表格"""
     df = pd.DataFrame()
-    if not db.isConnected:
-        return df
-    for up_id in get_all_up_id(db):
-        df = pd.concat([df, get_up_info(db, up_id)], ignore_index=True)
-    return df
-
-
-def get_all_video_info(db: DataBase, table: str = "video") -> pd.DataFrame:
-    df = pd.DataFrame()
-    if not db.isConnected:
+    if not db.isConnected or table == "":
         return df
     sql = f"SELECT * FROM {table};"
     df = pd.read_sql_query(sql, db.conn)
     return df
-
 
 def get_upexclude_up_fullinfo(db: DataBase) -> pd.DataFrame:
     """搜索所有排除的up并从up表中查询信息"""
@@ -502,9 +502,11 @@ def judge_bilibiliUP_needupdate(db: DataBase, up_id: str) -> int:
     if len(df) != 1:
         return -1
     series = df.iloc[0]
-    if int(series["data_time"]) < get_timestamp() - 60 * 60 * 24:  # 24h未更新
+    if series["data_time"] and int(series["data_time"]) < get_timestamp() - 60 * 60 * 24:  # 24h未更新
         return 1
-    if abs(int(series["up_sum"]) - len(get_allvideoinfo_byupid(db, series["up_id"]))) > 10:  # 总数与数据库相差过大
+    if (
+        series["up_sum"] and abs(int(series["up_sum"]) - len(get_allvideoinfo_byupid(db, series["up_id"]))) > 10
+    ):  # 总数与数据库相差过大
         return 2
     if len(get_video_info(db, str(series["up_last_vid"]))) == 0:  # 最新视频不在数据库中
         return 3

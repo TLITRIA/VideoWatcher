@@ -102,7 +102,7 @@ if __name__ == "__main__":
     wd.selenium_options.append("--mute-audio")
     wd.Login()
     db = DataBase()
-    db.Connect("D:/__Downloads__/videowatcher.db")
+    db.Connect(test_db_fp)
     create_all(db, default_create_sqls)
 
     w = ExcludeUpInfoWidget()

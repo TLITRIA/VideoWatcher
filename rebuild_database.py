@@ -22,9 +22,9 @@ if __name__ == "__main__":
     # ==================================== #
     # BiliBili
     up_ids = []
-    df = get_all_up_info(db)
+    df = get_whole_table(db, "up")
     df = df.sort_values(by="data_time")
-    print(f"原数据{len(df)}条")
+    print(f"bilibili原数据{len(df)}条")
     c1 = 0
     c2 = 0
     c3 = 0
@@ -45,6 +45,5 @@ if __name__ == "__main__":
     urls = [f"https://space.bilibili.com/{x}/upload/video" for x in up_ids]
     back_update_all(urls, db_fp)
     # ==================================== #
-
     l.info(logEnd())
     db.Disconnect()

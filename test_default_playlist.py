@@ -111,6 +111,7 @@ class Test_function(unittest.TestCase):
 
     def test_playlist_num(self):
         """测试读取指定数量的视频信息"""
+        # try:
         n = 325
         w = PlayListWidget()
         w.show()
@@ -119,6 +120,8 @@ class Test_function(unittest.TestCase):
         w.but_current.click()
         self.app.processEvents()
         self.assertEqual(w.flow_layout.count(), n)
+        # finally:
+        #     self.wd.Quit()
 
 
 if __name__ == "__main__":

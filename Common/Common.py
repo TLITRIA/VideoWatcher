@@ -35,3 +35,12 @@ def get_file_hash(file_path, hash_method=hashlib.sha256, block_size=65536):
 
 def split_list(lst, n):
     return (lst[i::n] for i in range(n))
+
+
+def scan_foldsize(folder_path):
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(folder_path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            total_size += os.path.getsize(fp)
+    return total_size

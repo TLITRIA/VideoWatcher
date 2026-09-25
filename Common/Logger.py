@@ -72,3 +72,31 @@ class Logger:
 
 def get_timestamp() -> int:
     return int(time.time())
+
+def get_timestamp_bydate(year:int, month:int, day:int, hour:int=0, minute:int=0, second:int=0) -> int:
+    # if year is None:
+    #     year = datetime.now().year
+    # if month is None:
+    #     month = datetime.now().month
+    # if day is None:
+    #     day = datetime.now().day
+    dt = datetime(year, month, day, hour, minute, second)
+    return int(dt.timestamp())
+
+def update_time_require(current: int, last: int, stamplist: list) -> float:
+    """
+    估算任务完成时间
+    :param current: 当前已完成任务数
+    :param last: 总任务数
+    :param stamplist: 记录每次完成任务的时间戳列表
+    :return: 预计剩余时间（秒）
+    """
+    if current <= 0 or last <= 0 or current > last:
+        return -1
+    stamplist.append((current, get_timestamp()))
+    if len(stamplist) < 2:
+        return -1
+    remaining_tasks = last - current
+    time_per_task = (stamplist[-1][1] - stamplist[0][1]) / (stamplist[-1][0] - stamplist[0][0])
+    estimated_remaining_time = float(time_per_task * remaining_tasks)
+    return estimated_remaining_time

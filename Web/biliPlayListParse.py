@@ -160,7 +160,10 @@ def parse_other_playlistPage(wd=None) -> pd.DataFrame:
             columns.append("cover")
 
             upload = xpath(node, './/div[@class="bili-video-card__subtitle"]')[0].get_attribute("textContent")
-            info.append(upload)
+            p = -1
+            if upload:
+                p = parse_upload_timestamp(upload)
+            info.append(p)
             columns.append("upload")
 
             pN, cN, dN = xpath(node, './/div/div[@class="bili-cover-card__stat"]')

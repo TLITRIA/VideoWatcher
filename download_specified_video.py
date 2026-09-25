@@ -10,18 +10,16 @@ from Web.biliAccess import *
 
 if __name__ == "__main__":
     pm = ProcessManager()
-    pm.StartWorkers(3)
+    pm.StartWorkers(5)
     db = DataBase()
-    db.Connect("D:/__Downloads__/videowatcher.db")
+    db.Connect()
 
     # 获取拥有tag的up的所有视频
     up_tags = ["downloadAll"]
     upids = search_up_bytags(db, up_tags)
     df = pd.DataFrame()
     for upid in upids:
-        df = pd.concat(
-            [df, get_allvideoinfo_byupid(db, upid)], ignore_index=True
-        )
+        df = pd.concat([df, get_allvideoinfo_byupid(db, upid)], ignore_index=True)
 
     # 筛选视频，创建下载记录
 
@@ -36,19 +34,13 @@ if __name__ == "__main__":
                 continue
             if int(series["isCharge"]) == 1:
                 continue
+            
+            #     continue
             downfold = os.path.join(root, upid)
             downfold = os.path.join(downfold, series["v_id"])
             downfold = downfold + "\\"
-            if os.path.exists(downfold): # TODO 
-                # count += 1
-                continue
-            
-            # pm.AddTask(
-            #     download_video,
-            #     *[series["v_id"], downfold, default_bili_cookie_ytdlp, 1]
-            # )
-            print(downfold, end="\n")
-            download_video(series["v_id"], downfold, default_bili_cookie_ytdlp, 1)
+            pm.AddTask(download_video, *[series["v_id"], downfold, default_bili_cookie_ytdlp, 1])
+            # download_video(series["v_id"], downfold, default_bili_cookie_ytdlp, 1)
             count += 1
     print(count)
     pm.WaitAll()

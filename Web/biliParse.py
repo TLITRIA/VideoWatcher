@@ -2,11 +2,9 @@ import re
 import pandas as pd
 import traceback
 from Web.MyWebDriver import *
-
-# from Web.BackWebDriver import *
 from Web.biliPlayListParse import *
-
 from Common.BiliBili import *
+from Common.Logger import *
 from DataAccess.sql_query import *
 
 videoinfo_xpath = '//div[@class="bili-video-card__wrap"]'
@@ -251,8 +249,10 @@ def parse_spacePage(wd=None) -> pd.DataFrame:
         columns.append("up_last_vid")
 
         date_string = xpath(nodes[0], './/div[@class="bili-video-card__subtitle"]')[0].get_attribute("textContent")
-        # date_stamp = bili_datestringParse(date_string)
-        info.append(date_string)
+        p = -1
+        if date_string:
+            p = parse_upload_timestamp(date_string)
+        info.append(p)
         columns.append("up_last_time")
 
     except:
@@ -341,6 +341,8 @@ def back_update_all(urls: list, db_fp: str):
     wd._driver.minimize_window()
 
     for index, url in enumerate(urls):
+        # if url != "https://space.bilibili.com//upload/video":
+        #     continue
         print("\n\n" + "=" * 80 + "\n")
         print(f"{index+1} / {len(urls)} : {url}")
         wd.Goto(url)
@@ -348,20 +350,21 @@ def back_update_all(urls: list, db_fp: str):
         wd.setTabPageTitle(f"{index+1} / {len(urls)} " + wd._driver.title)
         wd.xpath_wait(videoinfo_xpath)
         insert_up(db, parse_spacePage(wd))
-
         up_id = str(match_upspace(wd._driver.current_url))
+        print(f"该up视频总数应为：\t{int(get_up_info(db, up_id).iloc[0]['up_sum'])}")
+        print(f"现有视频总数为：\t{len(get_allvideoinfo_byupid(db, up_id))}")
         maxresult = get_len_missingvideo(db, up_id)
-        print(f"该up缺少的视频数量为{maxresult}, 抓取指定数量的视频")
-        insert_video(db, parse_multi_back_playlistPage(wd, maxresult))
-        print(f"该up视频总数为\t\t\t{int(get_up_info(db, up_id).iloc[0]['up_sum'])}")
-        print(f"按照缺失数爬取前n个视频后总数为\t{len(get_allvideoinfo_byupid(db, up_id))}")
+        if maxresult > 0:
+            print(f"该up缺少的视频数量为{maxresult}, 抓取指定数量的视频")
+            insert_video(db, parse_multi_back_playlistPage(wd, maxresult))
+            print(f"爬取后视频总数为：\t{len(get_allvideoinfo_byupid(db, up_id))}")
         for i in range(3):  # TODO magic 3
             if judge_bilibiliUP_needupdate(db, up_id) == 0:
                 break
             print(f"up主 {url} 的视频重新爬取")
             delete_allvideo_byupid(db, up_id)
-            wd._driver.refresh()
-            time.sleep(1)
+            wd._driver.refresh()  #
+            time.sleep(3)
             wd.setTabPageTitle(f"{index+1} / {len(urls)} " + wd._driver.title)
             insert_video(db, parse_multi_back_playlistPage(wd))
             print(f"再次爬取后数据库总数{len(get_allvideoinfo_byupid(db, up_id))}")

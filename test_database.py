@@ -5,6 +5,7 @@ from pprint import pprint
 from DataAccess.DataBase import *
 from DataAccess.sql_query import *
 from Common.Logger import *
+from Common.Abspath import *
 
 
 class TestRunWithoutError(unittest.TestCase):
@@ -23,7 +24,7 @@ class TestRunWithoutError(unittest.TestCase):
         """整个测试类执行前调用一次"""
         print("初始化测试类")
         cls.db = DataBase()
-        cls.db.Connect("D:/__Downloads__/videowatcher.db")
+        cls.db.Connect(test_db_fp)
 
     @classmethod
     def tearDownClass(cls):
@@ -43,7 +44,7 @@ class TestRunWithoutError(unittest.TestCase):
         with timeblock("数据库操作"):
             print("-" * 80)
             print("获取up表中所有的信息，以dataframe形式返回")
-            print(get_all_up_info(self.db))
+            print(get_whole_table(self.db, "up"))
         with timeblock("数据库操作"):
             print("-" * 80)
             print("获取up_exclude表中所有标记排除的up的信息，以df形式返回")

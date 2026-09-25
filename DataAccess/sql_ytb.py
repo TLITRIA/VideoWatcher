@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS ytbvideo(
     type INT, -- 类型：0 其他/默认 1 视频 2 直播
     title TEXT, -- 视频标题
     cover TEXT, -- 视频封面链接
-    upload TEXT, -- 视频上传时间
+    upload INT, -- 视频上传时间
     play INT, -- 播放量
     duration INT, -- 视频时长
     isCharge INT, -- 视频是否付费
@@ -103,3 +103,6 @@ def ytb_get_allvideoinfo_byupid(db: DataBase, up_id: str) -> pd.DataFrame:
 # def ytb_get_upid_isnotnew(db:DataBase)->list:
 #     """获取ytbup表中缺少最新video的up主的id"""
 #     return []
+
+def judge_ytbUp_needupdate(db: DataBase, up_id: str) -> bool:
+    return True

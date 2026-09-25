@@ -23,14 +23,13 @@ if __name__ == "__main__":
     wd.Login()
 
     db = DataBase()
-    # db.Connect(videowatcher_sql_fp)
-    db.Connect("D:/__Downloads__/videowatcher.db")
+    db.Connect(videowatcher_sql_fp)
     create_all(db, default_create_sqls)
 
     entry = EntryWidget()
     entry.show()
     # entry.pushButton_6.click() # 默认收藏夹
-    entry.pushButton_4.click()  # 所有Up重新读取
+    # entry.pushButton_4.click()  # 所有Up重新读取
 
     app.exec()
     pm.__del__()

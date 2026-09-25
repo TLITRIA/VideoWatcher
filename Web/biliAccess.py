@@ -5,6 +5,7 @@ import shutil
 import pandas as pd
 from Common.Abspath import default_bili_cookietxt
 from Common.Process import *
+from Common.Common import scan_foldsize
 from DataAccess.DataBase import *
 from DataAccess.sql_query import *
 
@@ -77,12 +78,15 @@ def goto_TODOWN_collectfolder(wd: MyWebDriver):
     wd.xpath_wait('//div[@class="bili-video-card__wrap"]')
 
 
-def download_video(bv, downfold, cookie="", limit_rate: int = 0) -> subprocess.CompletedProcess:
+def download_video(bv, downfold, cookie="", limit_rate: int = 0, possible_title: str = "") -> subprocess.CompletedProcess:
     """下载B站视频"""
     url = BV2url(bv)
     if os.path.exists(downfold):
-        shutil.rmtree(downfold)  # TODO 危险操作
-    g_mkdir_byfp(downfold)
+        if scan_foldsize(downfold) > 0:
+            print(f"文件夹 {downfold} 已存在且不为空，跳过下载")
+            return subprocess.CompletedProcess(args=[], returncode=0)
+    else:
+        g_mkdir_byfp(downfold)
 
     cmd = ["yt-dlp"]
     cmd.extend(["--no-check-certificate"] if cookie == "" else ["--cookies", cookie])  # 使用cookie
@@ -105,13 +109,13 @@ def download_video(bv, downfold, cookie="", limit_rate: int = 0) -> subprocess.C
 
 
 if __name__ == "__main__":
-    download_video("BV1scoDYeEFi", abspath(R"./.cache/downloadtest/") + '/', default_bili_cookie_ytdlp)
+    download_video("BV1scoDYeEFi", abspath(R"./.cache/downloadtest/") + "/", default_bili_cookie_ytdlp)
 
     """下载downloadAll up主的视频每人下载最新的一个，若已存在则选择前一个以此类推"""
     # pm = ProcessManager()
     # pm.StartWorkers(3)
     # db = DataBase()
-    # db.Connect("D:/__Downloads__/videowatcher.db")
+    # db.Connect(test_db_fp)
 
     # up_tags = ["downloadAll"]
     # upids = search_up_bytags(db, up_tags)

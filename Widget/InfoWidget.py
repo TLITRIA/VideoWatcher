@@ -1,4 +1,4 @@
-from UI.infoForm import Ui_Form
+from UI.infoFrom import Ui_Form
 import os, sys
 import pandas as pd
 from os.path import abspath

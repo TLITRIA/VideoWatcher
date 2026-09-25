@@ -31,7 +31,7 @@ class TestRunWithoutError(unittest.TestCase):
         cls.wd.selenium_options.append("--mute-audio")
         cls.wd.Login()
         cls.db = DataBase()
-        cls.db.Connect("D:/__Downloads__/videowatcher.db")
+        cls.db.Connect(test_db_fp)
         create_all(cls.db, default_create_sqls)
 
     @classmethod
