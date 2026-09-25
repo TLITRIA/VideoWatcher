@@ -36,9 +36,7 @@ class InfoWidget(QWidget, Ui_Form):
     v_select: list = []
     v_unselect: list = []
 
-    s_toolbar = pyqtSignal(
-        QWidget
-    )  # 自定义工具对话框，内容什么由上一级控件决定
+    s_toolbar = pyqtSignal(QWidget)  # 自定义工具对话框，内容什么由上一级控件决定
     s_del_infoW = pyqtSignal(QWidget)  # 删除控件的信号
     s_goto_upspace = pyqtSignal(str)  # 跳转up主页
     s_goto_videopage = pyqtSignal(str)  # 跳转视频页
@@ -46,16 +44,12 @@ class InfoWidget(QWidget, Ui_Form):
     def slot_goto_video(self):
         if not self._v_id:
             return
-        self.s_goto_videopage.emit(
-            f"https://www.bilibili.com/video/{self._v_id}/"
-        )
+        self.s_goto_videopage.emit(f"https://www.bilibili.com/video/{self._v_id}/")
 
     def slot_goto_space(self):
         if not self._up_id:
             return
-        self.s_goto_upspace.emit(
-            f"https://space.bilibili.com/{self._up_id}/upload/video"
-        )
+        self.s_goto_upspace.emit(f"https://space.bilibili.com/{self._up_id}/upload/video")
 
     def on_video_add(self, i: int):
         tag = self.cb_add_v.currentText()
@@ -77,7 +71,11 @@ class InfoWidget(QWidget, Ui_Form):
         if self.isBlocked:
             return
         update_one_up_exclude(
-            self.db, self._up_id, "", state == Qt.CheckState.Checked
+            self.db,
+            self._up_id,
+            "",
+            state == Qt.CheckState.Checked,
+            f"https://space.bilibili.com/{self._up_id}/upload/video",
         )
 
         if state == Qt.CheckState.PartiallyChecked:
@@ -123,36 +121,12 @@ class InfoWidget(QWidget, Ui_Form):
 
     def series_update_all(self, series: pd.Series):
         self.update_all(
-            v_id=(
-                ""
-                if "v_id" not in series.index.tolist()
-                else str(series["v_id"])
-            ),
-            up_id=(
-                ""
-                if "up_id" not in series.index.tolist()
-                else str(series["up_id"])
-            ),
-            up_name=(
-                ""
-                if "up_name" not in series.index.tolist()
-                else str(series["up_name"])
-            ),
-            face=(
-                ""
-                if "face" not in series.index.tolist()
-                else str(series["face"])
-            ),
-            cover=(
-                ""
-                if "cover" not in series.index.tolist()
-                else str(series["cover"])
-            ),
-            title=(
-                ""
-                if "title" not in series.index.tolist()
-                else str(series["title"])
-            ),
+            v_id=("" if "v_id" not in series.index.tolist() else str(series["v_id"])),
+            up_id=("" if "up_id" not in series.index.tolist() else str(series["up_id"])),
+            up_name=("" if "up_name" not in series.index.tolist() else str(series["up_name"])),
+            face=("" if "face" not in series.index.tolist() else str(series["face"])),
+            cover=("" if "cover" not in series.index.tolist() else str(series["cover"])),
+            title=("" if "title" not in series.index.tolist() else str(series["title"])),
         )
 
     def update_all(self, v_id, up_id, title, up_name, face="", cover=""):
@@ -232,22 +206,14 @@ class InfoWidget(QWidget, Ui_Form):
         up_id_table: dict[str, list[InfoWidget]] = {}
 
         def ADD(self, w: InfoWidget):
-            if (
-                w._up_id
-                and w._up_id in self.up_id_table.keys()
-                and w in self.up_id_table[w._up_id]
-            ):
+            if w._up_id and w._up_id in self.up_id_table.keys() and w in self.up_id_table[w._up_id]:
                 return
             table = self.up_id_table.get(w._up_id, [])
             table.append(w)
             self.up_id_table[w._up_id] = table
 
         def REMOVE(self, w: InfoWidget):
-            if (
-                w._up_id
-                and w._up_id in self.up_id_table.keys()
-                and w in self.up_id_table[w._up_id]
-            ):
+            if w._up_id and w._up_id in self.up_id_table.keys() and w in self.up_id_table[w._up_id]:
                 self.up_id_table[w._up_id].remove(w)
 
         def update_up_tags(self, up_id: str, select: list, unselect: list):

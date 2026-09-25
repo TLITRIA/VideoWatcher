@@ -39,7 +39,7 @@ if __name__ == "__main__":
             downfold = os.path.join(root, upid)
             downfold = os.path.join(downfold, series["v_id"])
             downfold = downfold + "\\"
-            if os.path.exists(downfold):
+            if os.path.exists(downfold): # TODO 
                 # count += 1
                 continue
             

@@ -353,9 +353,9 @@ def back_update_all(urls: list, db_fp: str):
         maxresult = get_len_missingvideo(db, up_id)
         print(f"该up缺少的视频数量为{maxresult}, 抓取指定数量的视频")
         insert_video(db, parse_multi_back_playlistPage(wd, maxresult))
-        print(f"该up视频总数为\t\t\t\t{int(get_up_info(db, up_id).iloc[0]['up_sum'])}")
+        print(f"该up视频总数为\t\t\t{int(get_up_info(db, up_id).iloc[0]['up_sum'])}")
         print(f"按照缺失数爬取前n个视频后总数为\t{len(get_allvideoinfo_byupid(db, up_id))}")
-        for i in range(3): # TODO magic 3
+        for i in range(3):  # TODO magic 3
             if judge_bilibiliUP_needupdate(db, up_id) == 0:
                 break
             print(f"up主 {url} 的视频重新爬取")

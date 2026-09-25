@@ -48,9 +48,7 @@ def remove_video_fromFold(datalist) -> bool:
                 if _nodes and _nodes[0].is_selected() and fold_id in node.text:
                     wd.ClickNode(_nodes[0])
                     time.sleep(0.5)
-            but_comfirm = wd.xpath_findall(
-                "//button[contains(text(), '确定')]"
-            )[0]
+            but_comfirm = wd.xpath_findall("//button[contains(text(), '确定')]")[0]
             wd.ClickNode(but_comfirm)
             time.sleep(1)
     wd.Quit()
@@ -79,9 +77,7 @@ def goto_TODOWN_collectfolder(wd: MyWebDriver):
     wd.xpath_wait('//div[@class="bili-video-card__wrap"]')
 
 
-def download_video(
-    bv, downfold, cookie="", limit_rate: int = 0
-) -> subprocess.CompletedProcess:
+def download_video(bv, downfold, cookie="", limit_rate: int = 0) -> subprocess.CompletedProcess:
     """下载B站视频"""
     url = BV2url(bv)
     if os.path.exists(downfold):
@@ -89,56 +85,55 @@ def download_video(
     g_mkdir_byfp(downfold)
 
     cmd = ["yt-dlp"]
-    cmd.extend(
-        ["--no-check-certificate"] if cookie == "" else ["--cookies", cookie]
-    )  # 使用cookie
+    cmd.extend(["--no-check-certificate"] if cookie == "" else ["--cookies", cookie])  # 使用cookie
     if limit_rate > 0:
         cmd.extend(["-r", f"{limit_rate}m"])  # 限速
     # TODO 画质选择
     cmd.append("-i")
-    cmd.extend(["-o", downfold + "%(title)s.%(ext)s"])  # 输出格式
-    cmd.append(url)
-    # TODO 下载字幕文件
+    cmd.extend(["-o", f"{downfold}%(title)s.%(ext)s"])  # 输出格式
+    # 字幕文件
+    cmd.extend(["--write-subs", "--write-auto-subs"])
+    cmd.extend(["--sub-langs", "en,zh-Hans,ai-zh,ai-en"])
+    cmd.extend(["--convert-subs", "srt"])
+    cmd.extend(["-o", f"subtitle:{downfold}%(title)s.%(ext)s"])
 
-    result = subprocess.run(
-        cmd, shell=True, stdout=sys.stdout, stderr=sys.stderr, text=True
-    )
+    cmd.append(url)
+    print(cmd)
+    result = subprocess.run(cmd, shell=True, stdout=sys.stdout, stderr=sys.stderr, text=True)
     time.sleep(5)
     return result
 
 
 if __name__ == "__main__":
-    # download_video("BV1nwauzREuU", R"D:\__Downloads__")
+    download_video("BV1scoDYeEFi", abspath(R"./.cache/downloadtest/") + '/', default_bili_cookie_ytdlp)
 
     """下载downloadAll up主的视频每人下载最新的一个，若已存在则选择前一个以此类推"""
-    pm = ProcessManager()
-    pm.StartWorkers(3)
-    db = DataBase()
-    db.Connect("D:/__Downloads__/videowatcher.db")
+    # pm = ProcessManager()
+    # pm.StartWorkers(3)
+    # db = DataBase()
+    # db.Connect("D:/__Downloads__/videowatcher.db")
 
-    up_tags = ["downloadAll"]
-    upids = search_up_bytags(db, up_tags)
-    df = pd.DataFrame()
-    for upid in upids:
-        df = pd.concat(
-            [df, get_allvideoinfo_byupid(db, upid)], ignore_index=True
-        )
+    # up_tags = ["downloadAll"]
+    # upids = search_up_bytags(db, up_tags)
+    # df = pd.DataFrame()
+    # for upid in upids:
+    #     df = pd.concat([df, get_allvideoinfo_byupid(db, upid)], ignore_index=True)
 
-    root = abspath(r"./.cache/download_specified_tags/")
+    # root = abspath(r"./.cache/download_specified_tags/")
 
-    for upid in upids:
-        tmpdf = df[df["up_id"] == upid]
-        for i in range(len(tmpdf)):
-            series = tmpdf.iloc[i]
-            downfold = os.path.join(root, upid)
-            downfold = os.path.join(downfold, series["v_id"])
-            downfold = downfold + "\\"
-            if os.path.exists(downfold):
-                continue
-            print(downfold, end="\n")
-            # download_video(series['v_id'], downfold)
-            pm.AddTask(download_video, *[series["v_id"], downfold])
-            break
+    # for upid in upids:
+    #     tmpdf = df[df["up_id"] == upid]
+    #     for i in range(len(tmpdf)):
+    #         series = tmpdf.iloc[i]
+    #         downfold = os.path.join(root, upid)
+    #         downfold = os.path.join(downfold, series["v_id"])
+    #         downfold = downfold + "\\"
+    #         if os.path.exists(downfold):
+    #             continue
+    #         print(downfold, end="\n")
+    #         # download_video(series['v_id'], downfold)
+    #         pm.AddTask(download_video, *[series["v_id"], downfold])
+    #         break
 
-    pm.__del__()
-    db.Disconnect()
+    # pm.__del__()
+    # db.Disconnect()

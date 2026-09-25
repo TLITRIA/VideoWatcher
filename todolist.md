@@ -1,3 +1,6 @@
+# 项目清理脚本
+
+
 # InfoWidget 问题
 测试前需要备份数据库
 - 短时间内对同一个up主的不同infowidget删除和修改会报错，试试用idDeleted截断操作 

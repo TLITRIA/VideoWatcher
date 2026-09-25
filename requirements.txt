@@ -8,3 +8,4 @@ ipdb
 yt-dlp
 matplotlib
 numpy
+black
