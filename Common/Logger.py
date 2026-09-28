@@ -1,7 +1,9 @@
 import os
 import time
 import logging
+import zipfile
 from datetime import datetime, timedelta
+from pathlib import Path
 from contextlib import contextmanager
 from Pattern.singleton import singleton
 from Common.Common import *
@@ -11,17 +13,19 @@ from Common.Abspath import default_log_fp
 @contextmanager
 def timeblock(label: str = ""):
     start = time.perf_counter()
+    result = {'elapsed':-1.0}
     try:
-        yield
+        yield result
     finally:
         end = time.perf_counter()
-        print(f"{label} 耗时：{end - start:.6f} s")
+        result["elapsed"] = end - start
+        print(f"{label} 耗时：{result["elapsed"]:.6f} s")
         # TODO 记录label/代码位置/运行频率/平均耗时，形成表格记录
 
 
-def mid_mess(mess: str, fillchar: str = "="):
+def mid_mess(mess: str, fillchar: str = "-"):
     if len(fillchar) != 1:
-        fillchar = "="
+        fillchar = "-"
     return f"{' ' + mess + '':{fillchar}^80}"
 
 
@@ -73,7 +77,8 @@ class Logger:
 def get_timestamp() -> int:
     return int(time.time())
 
-def get_timestamp_bydate(year:int, month:int, day:int, hour:int=0, minute:int=0, second:int=0) -> int:
+
+def get_timestamp_bydate(year: int, month: int, day: int, hour: int = 0, minute: int = 0, second: int = 0) -> int:
     # if year is None:
     #     year = datetime.now().year
     # if month is None:
@@ -83,8 +88,9 @@ def get_timestamp_bydate(year:int, month:int, day:int, hour:int=0, minute:int=0,
     dt = datetime(year, month, day, hour, minute, second)
     return int(dt.timestamp())
 
+
 def update_time_require(current: int, last: int, stamplist: list) -> float:
-    """
+    """TODO 报错
     估算任务完成时间
     :param current: 当前已完成任务数
     :param last: 总任务数
@@ -100,3 +106,32 @@ def update_time_require(current: int, last: int, stamplist: list) -> float:
     time_per_task = (stamplist[-1][1] - stamplist[0][1]) / (stamplist[-1][0] - stamplist[0][0])
     estimated_remaining_time = float(time_per_task * remaining_tasks)
     return estimated_remaining_time
+
+
+def add_timestamp_to_filename(file_path: str) -> str:
+    """
+    给完整文件路径的文件名添加当前时间戳后缀。
+    例如：/data/report.pdf -> /data/report_20250927_153012.pdf
+    """
+    p = Path(file_path)
+    timestamp = datetime.now().strftime("%Y%m%d")
+    new_name = f"{p.stem}_{timestamp}{p.suffix}"
+    return str(p.with_name(new_name))
+
+def generate_zip_filepath(file_path: str) -> str:
+    """
+    生成用于保存zip文件的路径。
+    例如：/data/report.pdf -> /data/report.zip
+    """
+    p = Path(file_path)
+    timestamp = datetime.now().strftime("%Y%m%d")
+    new_name = f"{p.stem}_{timestamp}.zip"
+    return str(p.with_name(new_name))
+
+def create_zip(from_path: str, to_path: str)->bool:
+    """
+    将单个文件压缩为zip文件。
+    """
+    with zipfile.ZipFile(to_path, 'w', zipfile.ZIP_LZMA) as zipf:
+        zipf.write(from_path, arcname=os.path.basename(from_path))
+    return os.path.exists(to_path)

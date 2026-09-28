@@ -6,7 +6,7 @@ from PyQt6.QtCore import pyqtSignal, Qt, QStringListModel
 
 from Web.MyWebDriver import *
 from Common.FlowLayout import FlowLayout
-from DataAccess.sql_query import *
+from DataAccess.sql_bilibili import *
 from Widget.InfoWidget import InfoWidget
 from Widget.ExcludeUpInfoWidget import ExcludeUpInfoWidget
 
@@ -19,8 +19,8 @@ class DbWidget(QWidget, Ui_Form):
 
     def on_click_bili_taged_video(self):
         self.FlowlayoutClear()
-        df = get_all_taged_video_df(self.__db)
-        self.AddInfoWidgets(df)
+        # df = get_all_taged_video_df(self.__db)
+        # self.AddInfoWidgets(df)
 
     def on_click_bili_up_exclude(self):
         self.FlowlayoutClear()
@@ -39,7 +39,7 @@ class DbWidget(QWidget, Ui_Form):
 
     def on_click_bili_up(self):
         self.FlowlayoutClear()
-        self.AddInfoWidgets(get_whole_table(self.__db, 'up'))
+        self.AddInfoWidgets(get_whole_table(self.__db, "up"))
 
     def __init__(self, parent=None):
         super(DbWidget, self).__init__()

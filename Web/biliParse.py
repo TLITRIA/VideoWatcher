@@ -3,9 +3,9 @@ import pandas as pd
 import traceback
 from Web.MyWebDriver import *
 from Web.biliPlayListParse import *
-from Common.BiliBili import *
+from Common.match_bili import *
 from Common.Logger import *
-from DataAccess.sql_query import *
+from DataAccess.sql_bilibili import *
 
 videoinfo_xpath = '//div[@class="bili-video-card__wrap"]'
 
@@ -63,13 +63,6 @@ def parse_videoPage() -> pd.DataFrame:
         cover = node.get_attribute("content")
         info.append(cover)
         columns.append("cover")
-
-        # upload
-        # play
-        # danmu
-        # duration
-        # isCharge
-        # data_time
     except:
         print("-" * 80)
         traceback.print_exc()
@@ -264,110 +257,48 @@ def parse_spacePage(wd=None) -> pd.DataFrame:
     return df
 
 
-def back_update_up(urls: list):
-    """
-    按照提供的up主视频页列表更新up主信息
-    """
+def task_bili_update_all(urls: list, db_fp: str):
+    """要求能够作为任务添加到processmanager"""
     if len(urls) == 0:
         return
     db = DataBase()
-    # db.Connect(videowatcher_sql_fp) TODO
-
+    if db.isConnected:
+        db.Disconnect()
+    db.Connect(db_fp)
     wd = MyWebDriver()
     wd.selenium_options.append("--force-dark-mode")
     wd.selenium_options.append("--mute-audio")
     wd.Login()
     wd._driver.minimize_window()
-
+    l = Logger()
     for index, url in enumerate(urls):
-        try:
-            print(f"进度条：{index+1}/{len(urls)}")
-            wd.Goto(url)
-            insert_up(db, parse_spacePage(wd))
-            wd.xpath_wait(videoinfo_xpath)
-            time.sleep(1)
-        except:
-            print(f"第 {index+1} 个up主 {url} 抓取失败")
-    wd.Quit()
-    if len(get_up_id_whichvideoisnotnew(db)) > 0:
-        print("up主未能更新最新视频")  # TODO: 通知
-
-
-def back_update_video(urls: list):
-    if len(urls) == 0:
-        return
-    db = DataBase()
-    # db.Connect(videowatcher_sql_fp) # TODO
-
-    wd = MyWebDriver()
-    wd.selenium_options.append("--force-dark-mode")
-    wd.selenium_options.append("--mute-audio")
-    wd.Login()
-    wd._driver.minimize_window()
-
-    for index, url in enumerate(urls):
-        wd.Goto(url)
-        time.sleep(1)
-        maxresult = 0
-        up_id = str(match_upspace(wd._driver.current_url))
-        try:
-            maxresult = get_len_missingvideo(db, up_id)
-        except:
-            pass
-        print(f"{index+1} / {len(urls)} : {url}")
-        print(f"该up缺少的视频数量为{maxresult}, 抓取指定数量的视频")
-        insert_video(db, parse_multi_back_playlistPage(wd, maxresult))
-        if get_len_missingvideo(db, up_id) > 0:  # 出现这种情况意味着可能中间有视频未抓取或者失效，需要完整地爬取
-            print(f"up主 {url} 的视频没有全部抓取到")
-            # TODO 清空该up的视频
-            wd.Goto(url)
-            time.sleep(1)
-            insert_video(db, parse_multi_back_playlistPage(wd))
-    wd.Quit()
-
-
-def back_update_all(urls: list, db_fp: str):
-    if len(urls) == 0:
-        return
-
-    db = DataBase()
-    if not db.isConnected:
-        db.Connect(db_fp)
-
-    wd = MyWebDriver()
-    wd.selenium_options.append("--force-dark-mode")
-    wd.selenium_options.append("--mute-audio")
-    wd.Login()
-    wd._driver.minimize_window()
-
-    for index, url in enumerate(urls):
-        # if url != "https://space.bilibili.com//upload/video":
-        #     continue
         print("\n\n" + "=" * 80 + "\n")
-        print(f"{index+1} / {len(urls)} : {url}")
+        l.info(f"{index+1} / {len(urls)} : {url}")
         wd.Goto(url)
         time.sleep(3)
         wd.setTabPageTitle(f"{index+1} / {len(urls)} " + wd._driver.title)
         wd.xpath_wait(videoinfo_xpath)
         insert_up(db, parse_spacePage(wd))
         up_id = str(match_upspace(wd._driver.current_url))
-        print(f"该up视频总数应为：\t{int(get_up_info(db, up_id).iloc[0]['up_sum'])}")
-        print(f"现有视频总数为：\t{len(get_allvideoinfo_byupid(db, up_id))}")
+        l.info(f"该up视频总数应为：\t{int(get_up_info(db, up_id).iloc[0]['up_sum'])}")
+        l.info(f"现有视频总数为：\t{len(get_allvideoinfo_byupid(db, up_id))}")
         maxresult = get_len_missingvideo(db, up_id)
         if maxresult > 0:
-            print(f"该up缺少的视频数量为{maxresult}, 抓取指定数量的视频")
+            l.info(f"该up缺少的视频数量为{maxresult}, 抓取指定数量的视频")
             insert_video(db, parse_multi_back_playlistPage(wd, maxresult))
-            print(f"爬取后视频总数为：\t{len(get_allvideoinfo_byupid(db, up_id))}")
-        for i in range(3):  # TODO magic 3
-            if judge_bilibiliUP_needupdate(db, up_id) == 0:
+            l.info(f"爬取后视频总数为：\t{len(get_allvideoinfo_byupid(db, up_id))}")
+
+        for i in range(3):  # TODO magic number
+            ret = judge_bilibiliUP_needupdate(db, up_id)
+            if ret == 0:
                 break
-            print(f"up主 {url} 的视频重新爬取")
+            l.info(f"up主 {url} 的视频重新爬取, 状况为：{ret}")
             delete_allvideo_byupid(db, up_id)
-            wd._driver.refresh()  #
+            wd._driver.refresh() # 刷新以前往分页第一页
             time.sleep(3)
             wd.setTabPageTitle(f"{index+1} / {len(urls)} " + wd._driver.title)
             insert_video(db, parse_multi_back_playlistPage(wd))
-            print(f"再次爬取后数据库总数{len(get_allvideoinfo_byupid(db, up_id))}")
+            l.info(f"再次爬取后数据库总数：\t{len(get_allvideoinfo_byupid(db, up_id))}")
 
     wd.Quit()
     db.Disconnect()

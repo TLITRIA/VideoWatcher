@@ -1,15 +1,18 @@
+# 环境配置
 uv venv --python 3.14
 uv pip install -r requirements.txt 
     -i https://pypi.tuna.tsinghua.edu.cn/simple 
     --system-certs
-准备浏览器当前版本对应的webdriver.exe并在Abspath.py中登记
+下载浏览器当前版本对应的webdriver.exe并在Abspath.py中登记
+    https://www.selenium.dev/documentation/webdriver/troubleshooting/errors/#sessionnotcreatedexception
+    https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
 
-# 下载
+# yt-dlp下载参数
 使用 yt-dlp --cookies-from-browser edge 需要关闭edge浏览器，这与项目中的设定冲突
 所以需要使用--cookies参数读取cookies文件
 yt-dlp --cookie 参数所要的文件暂时需要手动导出
 
-# vscode
+# vscode配置
 ## black插件
 步骤 1：安装插件
 打开 VSCode 扩展市场，搜索 Black Formatter 并安装。
@@ -26,6 +29,6 @@ yt-dlp --cookie 参数所要的文件暂时需要手动导出
 ## 终端长度
 terminal.integrated.scrollback
 
-# 初始化
+# 项目初始化
 部分项目需要的文件需要手动生成，暂无自动生成的方法
-先用vscode debug插件运行mywebdriver登录生成.cookie
+先用vscode debug插件运行mywebdriver登录生成 .cookie/

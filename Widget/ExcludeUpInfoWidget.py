@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QWidget
 from PyQt6.QtCore import pyqtSignal, Qt
 
 from DataAccess.DataBase import *
-from DataAccess.sql_query import *
+from DataAccess.sql_bilibili import *
 from Common.PyQt import register_webImg
 
 
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     wd.selenium_options.append("--mute-audio")
     wd.Login()
     db = DataBase()
-    db.Connect(test_db_fp)
+    db.Connect()
     create_all(db, default_create_sqls)
 
     w = ExcludeUpInfoWidget()
@@ -111,9 +111,9 @@ if __name__ == "__main__":
     )
     w.show()
     df = get_all_up_exclude_df(db)
-    print(type(df.iloc[0]))
-    w.series_update_all(df.iloc[0])
-
+    if not df.empty:
+        print(df)
+        w.series_update_all(df.iloc[0])
     sys.exit(app.exec())
     db.Disconnect()
     wd.Quit()

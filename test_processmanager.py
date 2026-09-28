@@ -6,7 +6,7 @@ import traceback
 from Common.Process import *
 from Common.Abspath import *
 from DataAccess.DataBase import *
-from DataAccess.sql_query import *
+from DataAccess.sql_bilibili import *
 import pandas as pd
 
 

@@ -1,5 +1,6 @@
 from UI.entryForm import Ui_Form
 import re
+import random
 from PyQt6.QtWidgets import QWidget, QListWidgetItem
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import pyqtSignal, Qt
@@ -10,54 +11,45 @@ from Widget.DbWidget import DbWidget
 from Web.MyWebDriver import MyWebDriver
 from Web.biliParse import *
 from Web.biliAccess import *
-from Common.BiliBili import *
+from Common.match_bili import *
 from Common.Process import *
-from DataAccess.sql_query import *
+from DataAccess.sql_bilibili import *
 
 
 class EntryWidget(QWidget, Ui_Form):
     _wd = MyWebDriver()
-
-    # def goto(self, url: str):
-    #     # self._wd.Focus()  # 为什么要添加这个？
-    #     self._wd.Goto(url)
-    #     self.focus()
 
     def on_update_fillup(self):
         up_ids = get_up_unfilled(DataBase())
         urls = []
         for up_id in up_ids:
             urls.append(f"https://space.bilibili.com/{up_id}/upload/video")
-        urls = list(set(urls))
-        pm = ProcessManager()
-        pm.AddTask(back_update_up, *[urls])
+        random.shuffle(urls)
+        pprint(urls)
 
     def on_update_allup(self):
         up_ids = get_all_up_id(DataBase())
         urls = []
         for up_id in up_ids:
             urls.append(f"https://space.bilibili.com/{up_id}/upload/video")
-        urls = list(set(urls))
-        pm = ProcessManager()
-        pm.AddTask(back_update_up, *[urls])
+        random.shuffle(urls)
+        pprint(urls)
 
     def on_update_fillvideo(self):
         up_ids = get_up_id_whichvideoisnotnew(DataBase())
         urls = []
         for up_id in up_ids:
             urls.append(f"https://space.bilibili.com/{up_id}/upload/video")
-        urls = list(set(urls))
-        pm = ProcessManager()
-        pm.AddTask(back_update_video, *[urls])
+        random.shuffle(urls)
+        pprint(urls)
 
     def on_update_allvideo(self):
         up_ids = get_all_up_id(DataBase())
         urls = []
         for up_id in up_ids:
             urls.append(f"https://space.bilibili.com/{up_id}/upload/video")
-        urls = list(set(urls))
-        pm = ProcessManager()
-        pm.AddTask(back_update_video, *[urls])
+        random.shuffle(urls)
+        pprint(urls)
 
     def on_click_defaultplaylist(self):
         goto_default_collectfolder(self._wd)
@@ -95,9 +87,7 @@ class EntryWidget(QWidget, Ui_Form):
             return
         print(f"未解析到页面: {url}")
         return
-        match = re.match(
-            r"(https://www.bilibili.com/video/[0-9a-zA-Z]*).*", url
-        )
+        match = re.match(r"(https://www.bilibili.com/video/[0-9a-zA-Z]*).*", url)
         if match:
             url = match.group(1)
             self.stackedWidget.setCurrentIndex(0)
@@ -105,9 +95,7 @@ class EntryWidget(QWidget, Ui_Form):
             vw.updateData()
             self.label.setText(self.title[0])
             return
-        match = re.match(
-            r"(https://space.bilibili.com/[0-9]*/upload/video)", url
-        )
+        match = re.match(r"(https://space.bilibili.com/[0-9]*/upload/video)", url)
         if match:
             url = match.group(1)
             self.stackedWidget.setCurrentIndex(1)
@@ -115,9 +103,7 @@ class EntryWidget(QWidget, Ui_Form):
             uw.updateData()
             self.label.setText(self.title[1])
             return
-        match = re.match(
-            r"(https://www.youtube.com/watch?v=[0-9a-zA-Z]*).*", url
-        )
+        match = re.match(r"(https://www.youtube.com/watch?v=[0-9a-zA-Z]*).*", url)
         if match:
             url = match.group(1)
             # self.update_ytbvideo()

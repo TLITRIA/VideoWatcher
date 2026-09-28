@@ -11,7 +11,7 @@ from Common.Abspath import *
 from Web.MyWebDriver import *
 from Web.biliAccess import goto_default_collectfolder
 from DataAccess.DataBase import *
-from DataAccess.sql_query import *
+from DataAccess.sql_bilibili import *
 from PyQt6.QtWidgets import QApplication
 from Widget.EntryWidget import EntryWidget
 from Widget.PlayListWidget import PlayListWidget
@@ -42,7 +42,7 @@ class TestRunWithoutError(unittest.TestCase):
         cls.wd.Login()
 
         cls.db = DataBase()
-        cls.db.Connect(videowatcher_sql_fp)
+        cls.db.Connect(bilibili_sql_fp)
         create_all(cls.db, default_create_sqls)
 
     @classmethod
@@ -95,7 +95,7 @@ class Test_function(unittest.TestCase):
         cls.wd.Login()
 
         cls.db = DataBase()
-        cls.db.Connect(videowatcher_sql_fp)
+        cls.db.Connect(bilibili_sql_fp)
         create_all(cls.db, default_create_sqls)
 
     @classmethod
@@ -111,17 +111,17 @@ class Test_function(unittest.TestCase):
 
     def test_playlist_num(self):
         """测试读取指定数量的视频信息"""
-        # try:
-        n = 325
-        w = PlayListWidget()
-        w.show()
-        goto_default_collectfolder(self.wd)
-        w.spinBox.setValue(n)
-        w.but_current.click()
-        self.app.processEvents()
-        self.assertEqual(w.flow_layout.count(), n)
-        # finally:
-        #     self.wd.Quit()
+        try:
+            n = 325
+            w = PlayListWidget()
+            w.show()
+            goto_default_collectfolder(self.wd)
+            w.spinBox.setValue(n)
+            w.but_current.click()
+            self.app.processEvents()
+            self.assertEqual(w.flow_layout.count(), n)
+        finally:
+            self.wd.Quit()
 
 
 if __name__ == "__main__":

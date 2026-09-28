@@ -5,7 +5,7 @@ from Common.Abspath import default_bili_cookietxt
 from Common.Process import *
 from Common.Logger import get_timestamp
 from DataAccess.DataBase import *
-from DataAccess.sql_query import *
+from DataAccess.sql_bilibili import *
 from Web.biliAccess import *
 
 if __name__ == "__main__":
@@ -34,8 +34,6 @@ if __name__ == "__main__":
                 continue
             if int(series["isCharge"]) == 1:
                 continue
-            
-            #     continue
             downfold = os.path.join(root, upid)
             downfold = os.path.join(downfold, series["v_id"])
             downfold = downfold + "\\"

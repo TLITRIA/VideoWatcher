@@ -7,7 +7,7 @@ from Common.Abspath import default_bili_cookietxt
 from Common.Process import *
 from Common.Common import scan_foldsize
 from DataAccess.DataBase import *
-from DataAccess.sql_query import *
+from DataAccess.sql_bilibili import *
 
 
 def sum_duration(df: pd.DataFrame) -> int:
@@ -78,7 +78,9 @@ def goto_TODOWN_collectfolder(wd: MyWebDriver):
     wd.xpath_wait('//div[@class="bili-video-card__wrap"]')
 
 
-def download_video(bv, downfold, cookie="", limit_rate: int = 0, possible_title: str = "") -> subprocess.CompletedProcess:
+def download_video(
+    bv, downfold, cookie="", limit_rate: int = 0, possible_title: str = ""
+) -> subprocess.CompletedProcess:
     """下载B站视频"""
     url = BV2url(bv)
     if os.path.exists(downfold):
@@ -109,7 +111,7 @@ def download_video(bv, downfold, cookie="", limit_rate: int = 0, possible_title:
 
 
 if __name__ == "__main__":
-    download_video("BV1scoDYeEFi", abspath(R"./.cache/downloadtest/") + "/", default_bili_cookie_ytdlp)
+    download_video("", abspath(R"./.cache/downloadtest/") + "/", default_bili_cookie_ytdlp)
 
     """下载downloadAll up主的视频每人下载最新的一个，若已存在则选择前一个以此类推"""
     # pm = ProcessManager()

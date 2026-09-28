@@ -3,7 +3,7 @@ import sys
 import traceback
 from pprint import pprint
 from DataAccess.DataBase import *
-from DataAccess.sql_query import *
+from DataAccess.sql_bilibili import *
 from Common.Logger import *
 from Common.Abspath import *
 
@@ -40,7 +40,7 @@ class TestRunWithoutError(unittest.TestCase):
         with timeblock("数据库操作"):
             print("-" * 80)
             print("获取up表中所有的up_id")
-            pprint(get_all_up_id(self.db))
+            pprint(get_all_up_id(self.db, "up"))
         with timeblock("数据库操作"):
             print("-" * 80)
             print("获取up表中所有的信息，以dataframe形式返回")
@@ -51,9 +51,9 @@ class TestRunWithoutError(unittest.TestCase):
             print(get_all_up_exclude_df(self.db))
         with timeblock("数据库操作"):
             print("-" * 80)
-            print("获取video表中所有有tag标记的video的信息，以df形式返回")
-            print(get_all_taged_video_df(self.db))
-        with timeblock("数据库操作"):
-            print("-" * 80)
             print("获取up表中缺少最新video的up的up_id")
             pprint(get_up_id_whichvideoisnotnew(self.db))
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

@@ -5,7 +5,7 @@ from Common.Logger import *
 from Common.Abspath import *
 from Web.MyWebDriver import *
 from DataAccess.DataBase import *
-from DataAccess.sql_query import *
+from DataAccess.sql_bilibili import *
 from PyQt6.QtWidgets import QApplication
 from Widget.EntryWidget import EntryWidget
 
@@ -23,13 +23,11 @@ if __name__ == "__main__":
     wd.Login()
 
     db = DataBase()
-    db.Connect(videowatcher_sql_fp)
+    db.Connect(bilibili_sql_fp)
     create_all(db, default_create_sqls)
 
     entry = EntryWidget()
     entry.show()
-    # entry.pushButton_6.click() # 默认收藏夹
-    # entry.pushButton_4.click()  # 所有Up重新读取
 
     app.exec()
     pm.__del__()

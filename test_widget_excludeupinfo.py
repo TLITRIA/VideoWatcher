@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QApplication
 from Web.MyWebDriver import *
 from Web.biliAccess import *
 from DataAccess.DataBase import *
-from DataAccess.sql_query import *
+from DataAccess.sql_bilibili import *
 from Common.Logger import *
 
 
@@ -54,3 +54,6 @@ class TestRunWithoutError(unittest.TestCase):
             self.app.processEvents()
         except Exception:
             self.fail(f"test_first_up_in_excludeup 执行异常:\n{traceback.format_exc()}")
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

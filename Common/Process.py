@@ -79,20 +79,3 @@ class ProcessManager:
         不会退出/关闭 worker，之后仍可继续 AddTask。
         """
         self.task_queue.join()
-
-    def WaitAllWithTimeout(self, timeout=None):
-        """
-        带超时的版本。返回 True 表示全部完成，False 表示超时。
-        注意：超时后 join() 已经在后台线程里跑完了才能这么判断，
-        若想严格超时，请用下面的轮询方式。
-        """
-        import time
-
-        deadline = None if timeout is None else time.time() + timeout
-        while True:
-            # unfinished_tasks 是 JoinableQueue 内部计数器
-            if self.task_queue._unfinished_tasks._semlock._is_zero():
-                return True
-            if deadline is not None and time.time() > deadline:
-                return False
-            time.sleep(0.01)

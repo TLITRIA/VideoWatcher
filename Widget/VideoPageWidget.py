@@ -9,10 +9,10 @@ from Web.biliParse import *
 from Widget.UrlWidget import UrlWidget
 from Widget.InfoWidget import InfoWidget
 from DataAccess.DataBase import *
-from DataAccess.sql_query import *
+from DataAccess.sql_bilibili import *
 
 
-class VideoPageWidget(QWidget, Ui_Form): # VideoPage
+class VideoPageWidget(QWidget, Ui_Form):  # VideoPage
     db: DataBase = DataBase()
     wd: MyWebDriver = MyWebDriver()
     s_goto = pyqtSignal(str)
@@ -25,7 +25,6 @@ class VideoPageWidget(QWidget, Ui_Form): # VideoPage
         container = QWidget()
         self.flow_layout = FlowLayout(container, margin=10, spacing=10)
         self.scrollArea.setWidget(container)
-        
 
     def updateData(self):
         # 1. 更新视频信息
@@ -51,6 +50,7 @@ class VideoPageWidget(QWidget, Ui_Form): # VideoPage
             w.s_goto_upspace.connect(lambda url: self.s_goto.emit(url))
             w.s_goto_videopage.connect(lambda url: self.s_goto.emit(url))
         # 3. 更新视频链接
+        # TODO 不止从intro中获取，还有评论区置顶及其他评论中找
         urls = []
         intro = parse_videoPage_intro(self.wd)
         for line in intro.split("\n"):

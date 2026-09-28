@@ -73,8 +73,11 @@ class MyWebDriver:
             if self._driver.current_url != url:
                 with timeblock(f"Goto({url})"):
                     self._driver.get(url)
-        except WebDriverException as e:
-            self._driver.get(url)
+        except WebDriverException as e: # TODO 连接超时的处理
+            try:
+                self._driver.get(url)
+            except Exception as e:
+                print(e)
         return self._driver
 
     def xpath_findall(self, xp):

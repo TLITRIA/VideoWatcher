@@ -3,11 +3,12 @@ import os, sys
 import pandas as pd
 from os.path import abspath
 
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget, QMessageBox
 from PyQt6.QtGui import QIcon, QCursor
 from PyQt6.QtCore import pyqtSignal, Qt, QStringListModel
 from DataAccess.DataBase import *
-from DataAccess.sql_query import *
+from DataAccess.sql_bilibili import *
+from Common.match_bili import *
 from Common.PyQt import *
 from Common.FlowLayout import *
 from Common.Process import *
@@ -25,9 +26,12 @@ class PlayListWidget(QWidget, Ui_Form):
 
     def on_input_url(self):  # 输入收藏夹url
         url = self.line_input.text()
-        self.line_input.clear()
-        self.wd.Goto(url)
-        self.update_playlist()
+        if match_playlist(url):
+            self.line_input.clear()
+            self.wd.Goto(url)
+            self.update_playlist()
+        else:
+            QMessageBox.warning(self, "警告", "请输入正确的收藏夹链接")
 
     def on_click_toolbut(self, w: InfoWidget):
         d = InfoFuncDialog(w)
@@ -35,7 +39,6 @@ class PlayListWidget(QWidget, Ui_Form):
         d.exec()
 
     def on_click_current(self):
-        # self.wd.FocusHead() 如何聚焦到当前打开的网站上？尤其是会手动更换窗口位置的情况下？
         if match_playlist(self.wd._driver.current_url):
             self.wd._driver.refresh()
             self.update_playlist()
@@ -47,9 +50,7 @@ class PlayListWidget(QWidget, Ui_Form):
             if not item:
                 continue
             w: InfoWidget = item.widget()
-            if exist_up(DataBase(), w._up_id) or exist_up_exclude(
-                DataBase(), w._up_id
-            ):
+            if exist_up(DataBase(), w._up_id) or exist_up_exclude(DataBase(), w._up_id):
                 data.append([w._v_id, w._fold_name])
                 w.s_del_infoW.emit(w)
         pm = ProcessManager()

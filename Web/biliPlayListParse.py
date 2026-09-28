@@ -3,10 +3,14 @@ import pandas as pd
 import traceback
 from Web.MyWebDriver import *
 from Common.Logger import timeblock
-from Common.BiliBili import *
+from Common.match_bili import *
 
 videoinfo_xpath = '//div[@class="bili-video-card__wrap"]'
-
+'''
+播放列表的爬取
+其他用户的播放列表与用户自己的播放列表不同，需要单独处理
+TODO 两种播放列表的处理应该合并，fold_name 在数据库自动选择值插入时不会冲突
+'''
 
 def parse_current_playlistPage(wd=None) -> pd.DataFrame:
     """

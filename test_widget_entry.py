@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QApplication
 from Web.MyWebDriver import *
 from Web.biliAccess import *
 from DataAccess.DataBase import *
-from DataAccess.sql_query import *
+from DataAccess.sql_bilibili import *
 from Common.Logger import *
 
 

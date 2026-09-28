@@ -8,8 +8,8 @@ from PyQt6.QtWidgets import QWidget, QCompleter, QComboBox, QDialog
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import pyqtSignal, Qt, QStringListModel
 from DataAccess.DataBase import *
-from DataAccess.sql_query import *
-from Common.BiliBili import *
+from DataAccess.sql_bilibili import *
+from Common.match_bili import *
 from Common.PyQt import *
 from Web.MyWebDriver import *
 from Web.biliParse import *
@@ -109,17 +109,16 @@ class InfoWidget(QWidget, Ui_Form):
     def __init__(self, parent=None):
         super(InfoWidget, self).__init__(parent)
         self.setupUi(self)
-        # self.but_govideo.setIcon(QIcon(abspath_arrow))
-        # self.but_gospace.setIcon(QIcon(abspath_arrow))
         self.cb_add_up.setEditable(True)
-        # self.cb_add_up.setPlaceholderText("添加用户标签")
+        # TODO python 类中安装事件过滤器，禁用滚轮
         self.cb_add_v.setEditable(True)
-        # self.cb_add_v.setPlaceholderText("添加视频标签")
 
-    def __del__(self):  # TODO 是否有这个函数？
+    def __del__(self):
         self.im.REMOVE(self)  # 从同步中删除
+        self.isDeleted = True
 
     def series_update_all(self, series: pd.Series):
+        '''# TODO: 重写'''
         self.update_all(
             v_id=("" if "v_id" not in series.index.tolist() else str(series["v_id"])),
             up_id=("" if "up_id" not in series.index.tolist() else str(series["up_id"])),
@@ -130,6 +129,7 @@ class InfoWidget(QWidget, Ui_Form):
         )
 
     def update_all(self, v_id, up_id, title, up_name, face="", cover=""):
+        '''# TODO: 重写'''
         if self._up_id:
             self.im.REMOVE(self)  # 每一次更新都要重新添加到同步管理器
         self._v_id = v_id  # 如果为None
@@ -246,3 +246,7 @@ class InfoWidget(QWidget, Ui_Form):
                 w.isBlocked = False
 
     im: InfoWidgetManager = InfoWidgetManager()
+
+
+if __name__ == "__main__":
+    """infowidget tags同时更新有问题"""

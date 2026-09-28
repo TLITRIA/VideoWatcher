@@ -33,13 +33,18 @@ def match_playlist(url: str) -> list[str] | None:
         return None
 
 
-def parse_upload_timestamp(upload_string: str) -> int:
+def parse_upload_timestamp(
+    upload_string: str,
+) -> int:
     ret = -1
+    year = datetime.now().year
+    month = datetime.now().month
+    day = datetime.now().day
     match = re.match(r"(\d+)天前", upload_string)
     if match:
-        ret = get_timestamp() - int(match.group(1)) * 24 * 60 * 60
+        return get_timestamp() - int(match.group(1)) * 24 * 60 * 60
     match = re.match(r"昨天 (\d+):(\d+)", upload_string)
-    if match:
+    if match:  # timestamp 计时起点是1970年1月1日8:00:00
         return (
             (get_timestamp() // (24 * 60 * 60) - 1) * 24 * 60 * 60
             - 8 * 60 * 60
@@ -54,7 +59,7 @@ def parse_upload_timestamp(upload_string: str) -> int:
         return get_timestamp() - int(match.group(1)) * 60
     match = re.match(r"(\d+)月(\d+)日", upload_string)
     if match:
-        return get_timestamp_bydate(datetime.now().year, int(match.group(1)), int(match.group(2)))
+        return get_timestamp_bydate(year, int(match.group(1)), int(match.group(2)))
     match = re.match(r"(\d+)年(\d+)月(\d+)日", upload_string)
     if match:
         return get_timestamp_bydate(int(match.group(1)), int(match.group(2)), int(match.group(3)))
@@ -63,13 +68,11 @@ def parse_upload_timestamp(upload_string: str) -> int:
         return get_timestamp_bydate(int(match.group(1)), int(match.group(2)), int(match.group(3)))
     match = re.match(r"(\d+)-(\d+)", upload_string)
     if match:
-        return get_timestamp_bydate(datetime.now().year, int(match.group(1)), int(match.group(2)))
+        return get_timestamp_bydate(year, int(match.group(1)), int(match.group(2)))
     if upload_string == "昨天":
-        return get_timestamp_bydate(datetime.now().year, datetime.now().month, datetime.now().day) - 24 * 60 * 60
-        # print("-" * 80)  # 验证解析结果
-        # print(upload_string)
-        # print(datetime.fromtimestamp(ret))
+        return get_timestamp_bydate(year, month, day) - 24 * 60 * 60
     if ret == -1:
+        print("-" * 80)
         print(upload_string)
         raise Exception(f"无法解析上传时间戳: {upload_string}")
     return ret

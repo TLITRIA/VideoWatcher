@@ -4,10 +4,14 @@ from urllib.request import urlretrieve
 from Common.Common import *
 import shutil
 
+
+from PyQt6.QtWidgets import QLabel
+from PyQt6.QtCore import QUrl, Qt
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
+
+"""
 def dlHash(url:str, filename:str = 'tmp.png'):
-    '''
-    下载图片到本地以显示
-    '''
     local_fold = abspath(R"./.cache/picture/")
     fp = os.path.join(local_fold, filename)
     if not os.path.exists(fp):
@@ -21,18 +25,13 @@ def dlHash(url:str, filename:str = 'tmp.png'):
 
 def dlCache(url:str):
     ...
+"""
 
 
-from PyQt6.QtWidgets import QLabel
-from PyQt6.QtCore import QUrl, Qt
-from PyQt6.QtGui import QPixmap
-from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
-
-
-def register_webImg(label:QLabel, url:str):
+def register_webImg(label: QLabel, url: str):
     network_manager = QNetworkAccessManager()
-    
-    def on_image_loaded(reply:QNetworkReply):
+
+    def on_image_loaded(reply: QNetworkReply):
         if reply.error() == QNetworkReply.NetworkError.NoError:
             data = reply.readAll()
             image = QPixmap()
@@ -48,7 +47,7 @@ def register_webImg(label:QLabel, url:str):
     def cancel_download():
         try:
             network_manager.disconnect()
-            print("Download cancelled")
+            # print("Download cancelled")
         except:
             pass
 
@@ -56,4 +55,3 @@ def register_webImg(label:QLabel, url:str):
     label.destroyed.connect(cancel_download)
     request = QNetworkRequest(QUrl(url))
     network_manager.get(request)
-    
