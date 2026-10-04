@@ -170,7 +170,8 @@ def parse_YtbVideos(wd: MyWebDriver, ytbtype: int = 1) -> pd.DataFrame:
             info.append(duration)
             cols.append("duration")
 
-            info.append(bool("会员专享" in node.text))
+            isCharge: bool = "会员专享" in node.text or "会员抢先观看" in node.text
+            info.append(isCharge)
             cols.append("isCharge")
 
             info.append(get_timestamp())

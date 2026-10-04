@@ -1,4 +1,5 @@
 """youtube dlc 扩充"""
+
 from DataAccess.sql_bilibili import *
 
 ytb_create_sqls = [
@@ -118,12 +119,12 @@ def judge_ytbUp_needupdate(db: DataBase, up_id: str) -> bool:
     series = df.iloc[0]
     if series["up_id"] in ytb_get_up_unfilled(db):
         return True
-    if not series["data_time"] or int(series["data_time"]) < get_timestamp() - 60 * 60 * 24:  # 24h未更新
+    if not series["data_time"] or int(series["data_time"]) < get_timestamp() - 60 * 60 * 24 * 7:  # up信息未更新
         return True
     if (
         not series["last_update_video_time"]
         or int(series["last_update_video_time"]) < get_timestamp() - 60 * 60 * 24 * 7
-    ):  # 7d未下载
+    ):  # up视频信息未更新
         return True
     df = get_allvideoinfo_byupid(db, up_id, "ytbup")
     if df.empty:
