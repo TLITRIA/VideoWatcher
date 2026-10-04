@@ -80,7 +80,7 @@ class InfoWidget(QWidget, Ui_Form):
 
         if state == Qt.CheckState.PartiallyChecked:
             if match_upspace(self.wd._driver.current_url):
-                insert_up(self.db, parse_spacePage())
+                insert_up(self.db, parse_spacePage(MyWebDriver()))
             else:
                 insert_up_null(self.db, self._up_id)
         else:
@@ -110,8 +110,16 @@ class InfoWidget(QWidget, Ui_Form):
         super(InfoWidget, self).__init__(parent)
         self.setupUi(self)
         self.cb_add_up.setEditable(True)
-        # TODO python 类中安装事件过滤器，禁用滚轮
         self.cb_add_v.setEditable(True)
+
+        # 禁用滚轮事件
+        self.wheelblocker = WheelBlocker(self)
+        self.cb_add_up.installEventFilter(self.wheelblocker)
+        self.cb_add_v.installEventFilter(self.wheelblocker)
+        self.cb_del_up.installEventFilter(self.wheelblocker)
+        self.cb_del_v.installEventFilter(self.wheelblocker)
+
+        
 
     def __del__(self):
         self.im.REMOVE(self)  # 从同步中删除

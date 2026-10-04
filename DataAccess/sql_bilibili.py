@@ -87,7 +87,7 @@ def insert_up_null(db: DataBase, up_id: str, table: str = "up"):
 
 
 def insert_up(db: DataBase, df: pd.DataFrame, table: str = "up"):
-    """向up表中插入数据，会自动选择插入哪些字段，不插入哪些字段"""
+    """基于up_id向表中插入数据，会自动选择插入哪些字段，不插入哪些字段"""
     if not db.isConnected:
         return False
     result = db.conn.execute(f"PRAGMA table_info({table})")
@@ -123,7 +123,7 @@ def insert_up(db: DataBase, df: pd.DataFrame, table: str = "up"):
 
 
 def insert_video(db: DataBase, df: pd.DataFrame, table: str = "video"):
-    """向video表中插入数据，会自动选择插入哪些字段，不插入哪些字段"""
+    """基于v_id向表中插入数据，会自动选择插入哪些字段，不插入哪些字段"""
     if not db.isConnected:
         return False
     result = db.conn.execute(f"PRAGMA table_info({table})")
@@ -188,11 +188,11 @@ def rebuild_table(db: DataBase, table: str, create_sql: str, df: pd.DataFrame):
 
 
 # ============================================================ #
-def delete_up(db: DataBase, up_id: str):
-    """从up表删除记录"""
+def delete_up(db: DataBase, up_id: str, table: str = "up"):
+    """依照up_id删除表中的数据"""
     if not db.isConnected or not up_id:
         return False
-    sql = f"DELETE FROM up WHERE up_id='{up_id}';"
+    sql = f"DELETE FROM {table} WHERE up_id='{up_id}';"
     db.ExecuteNow(sql)
     return True
 
@@ -366,7 +366,12 @@ def get_up_unfilled(db: DataBase) -> list:
     if not db.isConnected:
         return []
     # 定义什么样的数据是残缺的
-    sql = "SELECT up_id FROM up WHERE up_name IS NULL OR face IS NULL OR up_last_time IS NULL;"
+    sql = "SELECT up_id " \
+    "FROM up " \
+    "WHERE up_name IS NULL " \
+    "OR face IS NULL " \
+    "OR up_last_time IS NULL" \
+    ";"
     ret = [row[0] for row in db.conn.execute(sql).fetchall() if row[0] != ""]
     ret = sorted(list(set(ret)))
     return ret
@@ -377,8 +382,8 @@ def get_all_up_id(db: DataBase, table: str = "up") -> list:
     ret = []
     if not db.isConnected:
         return []
-    sql = f"SELECT up_id FROM {table} ORDER BY data_time;"  # 按照更新时间从前往后
-    ret = [row[0] for row in db.conn.execute(sql).fetchall() if row[0] != ""]
+    sql = f"SELECT up_id FROM {table};"  
+    ret = [str(row[0]) for row in db.conn.execute(sql).fetchall() if row[0] != ""]
     return ret
 
 

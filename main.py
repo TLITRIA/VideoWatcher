@@ -28,6 +28,7 @@ if __name__ == "__main__":
 
     entry = EntryWidget()
     entry.show()
+    entry.but_dbview.click() 
 
     app.exec()
     pm.__del__()

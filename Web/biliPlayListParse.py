@@ -24,26 +24,27 @@ def parse_current_playlistPage(wd=None) -> pd.DataFrame:
     # print('-'*80)
     # with timeblock("step1 : wait"):
     tmp_count = 0
-    nodes = wd.xpath_wait(videoinfo_xpath)
+    
     wd.xpath_wait('//a[@class="bili-cover-card"]')
     wd.xpath_wait('//div[@class="bili-video-card__text"]')
     wd.xpath_wait('//a[@class="bili-video-card__author"]')
-    while len(nodes) == 0:
-        nodes = wd.xpath_wait(videoinfo_xpath)
-        tmp_count += 1
-        if tmp_count == 3:
-            wd._driver.refresh()
-        if tmp_count > 6:
-            return df
-    fold_name = ""
+    # nodes = wd.xpath_wait(videoinfo_xpath)
+    # while len(nodes) == 0:
+    #     nodes = wd.xpath_wait(videoinfo_xpath)
+    #     tmp_count += 1
+    #     if tmp_count == 3:
+    #         wd._driver.refresh()
+    #     if tmp_count > 6:
+    #         return df
+
     # with timeblock("step2: fold_name"):
     fold_name = "默认收藏夹"
-    match = re.match(r".*fid=([0-9]*)&ftype=create", wd._driver.current_url)
+    match = re.match(r".*fid=([0-9]*)&ftype=create", wd._driver.current_url) # TODO 取得用户id
     if match:
         fold_nodes = wd.xpath_findall(f'//div[@class="fav-sidebar-item" and @id="{match.group(1)}"]')
         if len(fold_nodes):
             fold_name = fold_nodes[0].get_attribute("title")
-
+    nodes = wd.xpath_wait(videoinfo_xpath)
     for index, node in enumerate(nodes):  # //div[@class="bili-video-card__wrap"]
         # with timeblock(f"step3: parse {index} node"):
         try:
@@ -94,6 +95,8 @@ def parse_current_playlistPage(wd=None) -> pd.DataFrame:
             df = pd.concat([df, tmp_df])
         except:
             traceback.print_exc()
+    if df.empty:
+        print("未解析到任何视频信息")
     return df
 
 

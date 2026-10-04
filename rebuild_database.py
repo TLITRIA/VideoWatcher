@@ -45,7 +45,7 @@ def rebuild_bilibili(db: DataBase, db_fp: str):
     l.info(f"最新的视频不在数据库中的有{c3}条")
     urls = [f"https://space.bilibili.com/{x}/upload/video" for x in up_ids]
     random.shuffle(urls)
-    task_bili_update_all(urls, db_fp)
+    task_bili_update_all(urls, db_fp, True)
 
 
 def rebuild_youtube(db: DataBase, db_fp: str):

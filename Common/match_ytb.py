@@ -120,7 +120,7 @@ def parse_ytbPlaytimes(playstring: str) -> int:
         with open(fp, "a+", encoding="utf-8") as f:
             csv_writer = csv.writer(f)
             csv_writer.writerow([playstring])
-        print(mid_mess(f"无法解析的play：{playstring}"))
+        # print(mid_mess(f"无法解析的play：{playstring}"))
     else:
         """"""
     return ret
@@ -149,7 +149,7 @@ def parse_ytbDuration(duration: str) -> int:
         with open(fp, "a+", encoding="utf-8") as f:
             csv_writer = csv.writer(f)
             csv_writer.writerow([duration])
-        print(mid_mess(f"无法解析的duration：{duration}"))
+        # print(mid_mess(f"无法解析的duration：{duration}"))
     else:
         """"""
     return ret

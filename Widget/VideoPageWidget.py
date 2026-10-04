@@ -14,7 +14,6 @@ from DataAccess.sql_bilibili import *
 
 class VideoPageWidget(QWidget, Ui_Form):  # VideoPage
     db: DataBase = DataBase()
-    wd: MyWebDriver = MyWebDriver()
     s_goto = pyqtSignal(str)
 
     def __init__(self, parent=None):
@@ -29,11 +28,11 @@ class VideoPageWidget(QWidget, Ui_Form):  # VideoPage
     def updateData(self):
         # 1. 更新视频信息
         infow = InfoWidget(self)
-        infow.series_update_all(parse_videoPage().iloc[0])
+        infow.series_update_all(parse_videoPage(MyWebDriver()).iloc[0])
         infow.s_goto_upspace.connect(lambda url: self.s_goto.emit(url))
         infow.s_goto_videopage.connect(lambda url: self.s_goto.emit(url))
         # 2. 更新相关视频
-        df = parse_videoPage_related()
+        df = parse_videoPage_related(MyWebDriver())
         self.remove_allFlowLayout()
         for i in range(len(df)):
             w = InfoWidget(self)
@@ -52,7 +51,7 @@ class VideoPageWidget(QWidget, Ui_Form):  # VideoPage
         # 3. 更新视频链接
         # TODO 不止从intro中获取，还有评论区置顶及其他评论中找
         urls = []
-        intro = parse_videoPage_intro(self.wd)
+        intro = parse_videoPage_intro(MyWebDriver())
         for line in intro.split("\n"):
             line = line.strip()
             if line.startswith("https://"):

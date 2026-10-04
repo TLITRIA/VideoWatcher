@@ -5,8 +5,8 @@ from Common.Common import *
 import shutil
 
 
-from PyQt6.QtWidgets import QLabel
-from PyQt6.QtCore import QUrl, Qt
+from PyQt6.QtWidgets import QLabel, QSpinBox, QComboBox, QDoubleSpinBox
+from PyQt6.QtCore import QUrl, Qt, QEvent, QObject
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
@@ -55,3 +55,23 @@ def register_webImg(label: QLabel, url: str):
     label.destroyed.connect(cancel_download)
     request = QNetworkRequest(QUrl(url))
     network_manager.get(request)
+
+class WheelBlocker(QObject):
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.Type.Wheel and isinstance(
+                obj, (QSpinBox, QDoubleSpinBox, QComboBox)):
+            event.ignore()
+            print("wheel event ignored")
+            return True   # 事件被拦截
+        return super().eventFilter(obj, event)
+
+class SizeSyncFilter(QObject):
+    def __init__(self, source, target, parent=None):
+        super().__init__(parent)
+        self.source = source
+        self.target = target
+
+    def eventFilter(self, obj, event):
+        if obj is self.source and event.type() == QEvent.Resize:
+            self.target.resize(self.source.size())
+        return super().eventFilter(obj, event)

@@ -188,7 +188,7 @@ def parse_YtbVideos(wd: MyWebDriver, ytbtype: int = 1) -> pd.DataFrame:
     return df
 
 
-def task_update_ytb_database(urls: list, db_fp: str):
+def task_update_ytb_database(urls: list, db_fp: str, ytb_types: list = ["视频", "直播"]):
     """更新数据库"""
     if len(urls) == 0 or db_fp == "":
         return
@@ -208,7 +208,7 @@ def task_update_ytb_database(urls: list, db_fp: str):
         wd.Goto(url)
         time.sleep(10)
         wd.setTabPageTitle(f"{index+1} / {len(urls)} " + wd._driver.title)
-        parse_YtbUp(wd, db, ["视频", "直播"])
+        parse_YtbUp(wd, db, ytb_types)
 
     wd.Quit()
     db.Disconnect()

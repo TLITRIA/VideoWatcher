@@ -18,38 +18,45 @@ from DataAccess.sql_bilibili import *
 
 class EntryWidget(QWidget, Ui_Form):
     _wd = MyWebDriver()
+    _db = DataBase()
 
     def on_update_fillup(self):
-        up_ids = get_up_unfilled(DataBase())
-        urls = []
-        for up_id in up_ids:
-            urls.append(f"https://space.bilibili.com/{up_id}/upload/video")
-        random.shuffle(urls)
-        pprint(urls)
+        if not self._db.isConnected:
+            return
+        up_unfilled = get_up_unfilled(self._db)
+        up_ids = []
+        for i, up_id in enumerate(get_all_up_id(self._db, "up")):
+            # print(f"\r正在确认第{i+1}个UP主是否需要更新...", end="")
+            if up_id in up_unfilled:
+                up_ids.append(up_id)
+        print()
+        urls = [f"https://space.bilibili.com/{x}/upload/video" for x in up_ids]
+        if len(urls) > 0:
+            pm = ProcessManager()
+            pm.AddTask(task_bili_update_all, *[urls, default_db_fp, False])
 
     def on_update_allup(self):
-        up_ids = get_all_up_id(DataBase())
-        urls = []
-        for up_id in up_ids:
-            urls.append(f"https://space.bilibili.com/{up_id}/upload/video")
-        random.shuffle(urls)
-        pprint(urls)
+        if not self._db.isConnected:
+            return
+        up_ids = get_all_up_id(self._db, "up")
+        urls = [f"https://space.bilibili.com/{x}/upload/video" for x in up_ids]
+        if len(urls) > 0:
+            pm = ProcessManager()
+            pm.AddTask(task_bili_update_all, *[urls, default_db_fp, False])
 
-    def on_update_fillvideo(self):
-        up_ids = get_up_id_whichvideoisnotnew(DataBase())
-        urls = []
-        for up_id in up_ids:
-            urls.append(f"https://space.bilibili.com/{up_id}/upload/video")
-        random.shuffle(urls)
-        pprint(urls)
-
-    def on_update_allvideo(self):
-        up_ids = get_all_up_id(DataBase())
-        urls = []
-        for up_id in up_ids:
-            urls.append(f"https://space.bilibili.com/{up_id}/upload/video")
-        random.shuffle(urls)
-        pprint(urls)
+    def on_click_bilibili_rebuild(self):
+        if not self._db.isConnected:
+            return
+        up_ids = []
+        for i, up_id in enumerate(get_all_up_id(self._db, "up")):
+            print(f"\r正在确认第{i+1}个UP主是否需要更新...", end="")
+            ret = judge_bilibiliUP_needupdate(self._db, up_id)
+            if ret != 0:
+                up_ids.append(up_id)
+        urls = [f"https://space.bilibili.com/{x}/upload/video" for x in up_ids]
+        if len(urls) > 0:
+            pm = ProcessManager()
+            pm.AddTask(task_bili_update_all, *[urls, default_db_fp, True])
 
     def on_click_defaultplaylist(self):
         goto_default_collectfolder(self._wd)
@@ -68,7 +75,7 @@ class EntryWidget(QWidget, Ui_Form):
         url = self._wd._driver.current_url
         if match_upspace(url):  # bilibili up主视频页
             w = InfoWidget()
-            w.series_update_all(parse_spacePage().iloc[0])
+            w.series_update_all(parse_spacePage(self._wd).iloc[0])
             w.s_goto_videopage.connect(lambda url: self._wd.Goto(url))
             w.s_goto_upspace.connect(lambda url: self._wd.Goto(url))
             w.show()
@@ -82,8 +89,8 @@ class EntryWidget(QWidget, Ui_Form):
         elif match_playlist(url):
             w = PlayListWidget()
             w.s_goto.connect(lambda url: self._wd.Goto(url))
+            w.showMaximized()
             w.update_playlist()
-            w.show()
             return
         print(f"未解析到页面: {url}")
         return

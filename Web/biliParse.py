@@ -14,12 +14,13 @@ def if404(wd: MyWebDriver) -> bool:
     return len(wd.xpath_wait('//div[@class="code" and contains(text(), "错误码：-404")]')) != 0
 
 
-def parse_videoPage() -> pd.DataFrame:
+def parse_videoPage(wd: MyWebDriver) -> pd.DataFrame:
     """
     视频播放页
     视频本身的信息
     """
-    wd = MyWebDriver()
+    if wd._isQuit or not hasattr(wd, "_driver"):
+        return pd.DataFrame()
     df = pd.DataFrame()
     info = []
     columns = []
@@ -70,50 +71,53 @@ def parse_videoPage() -> pd.DataFrame:
     return df
 
 
-def parse_videoPage_face() -> str:
-    wd = MyWebDriver()
-    try:
-        node = wd.xpath_wait("//img[@data-src]")[1]
-        if node:
-            url = node.get_attribute("data-src")
-            if url:
-                url = "https:" + url.split("@")[0]
-                return url
-    except:
-        pass
-    return ""
+# def parse_videoPage_face(wd: MyWebDriver) -> str:
+#     if wd._isQuit or not hasattr(wd, "_driver"):
+#         return ""
+#     try:
+#         node = wd.xpath_wait("//img[@data-src]")[1]
+#         if node:
+#             url = node.get_attribute("data-src")
+#             if url:
+#                 url = "https:" + url.split("@")[0]
+#                 return url
+#     except:
+#         pass
+#     return ""
 
 
-def parse_videoPage_vid() -> str:
-    wd = MyWebDriver()
-    vid = ""
-    try:
-        match = re.match(
-            r"https://www.bilibili.com/video/([0-9a-zA-Z]*)/.*",
-            wd._driver.current_url,
-        )
-        if match:
-            vid = match.group(1)
-    except:
-        pass
-    return vid
+# def parse_videoPage_vid(wd: MyWebDriver) -> str:
+#     if wd._isQuit or not hasattr(wd, "_driver"):
+#         return ""
+#     vid = ""
+#     try:
+#         match = re.match(
+#             r"https://www.bilibili.com/video/([0-9a-zA-Z]*)/.*",
+#             wd._driver.current_url,
+#         )
+#         if match:
+#             vid = match.group(1)
+#     except:
+#         pass
+#     return vid
 
 
-def parse_videoPage_upid(wd=None) -> str:
-    if wd is None:
-        wd = MyWebDriver()
-    node = wd.xpath_wait("//div[@class='up-detail-top']/a")[0]
-    up_id = node.get_attribute("href")
-    if up_id:
-        match = re.match(r"https://space.bilibili.com/([0-9]*)/.*", up_id)
-        if match:
-            up_id = match.group(1)
-            return up_id
-    return ""
+# def parse_videoPage_upid(wd: MyWebDriver) -> str:
+#     if wd._isQuit or not hasattr(wd, "_driver"):
+#         return ""
+#     nodes = wd.xpath_wait("//div[@class='up-detail-top']/a")
+#     if len(nodes) > 0:
+#         href = nodes[0].get_attribute("href")
+#         if href:
+#             match = re.match(r"https://space.bilibili.com/([0-9]*)/.*", href)
+#             if match:
+#                 return match.group(1)
+#     return ""
 
 
-def parse_videoPage_related() -> pd.DataFrame:
-    wd = MyWebDriver()
+def parse_videoPage_related(wd: MyWebDriver) -> pd.DataFrame:
+    if wd._isQuit or not hasattr(wd, "_driver"):
+        return pd.DataFrame()
     df = pd.DataFrame()
     info = []
     columns = []
@@ -124,6 +128,7 @@ def parse_videoPage_related() -> pd.DataFrame:
         wd.ClickNode(but)
         wd.ScrollToBottomAndBack()
         wd.xpath_wait("//img")
+
         nodes = wd.xpath_wait('//div[@class="video-page-card-small"]')
         for index, node in enumerate(nodes):
             info = []
@@ -173,6 +178,8 @@ def parse_videoPage_related() -> pd.DataFrame:
 
 
 def parse_videoPage_intro(wd: MyWebDriver) -> str:
+    if wd._isQuit or not hasattr(wd, "_driver"):
+        return ""
     intro = ""
     try:
         nodes = wd.xpath_wait("//span[@class='desc-info-text']")
@@ -184,10 +191,10 @@ def parse_videoPage_intro(wd: MyWebDriver) -> str:
     return intro
 
 
-def parse_spacePage(wd=None) -> pd.DataFrame:
+def parse_spacePage(wd: MyWebDriver) -> pd.DataFrame:
+    if wd._isQuit or not hasattr(wd, "_driver"):
+        return pd.DataFrame()
     df = pd.DataFrame()
-    if wd is None:
-        wd = MyWebDriver()
     info = []
     columns = []
     time.sleep(5)
@@ -257,8 +264,14 @@ def parse_spacePage(wd=None) -> pd.DataFrame:
     return df
 
 
-def task_bili_update_all(urls: list, db_fp: str):
-    """要求能够作为任务添加到processmanager"""
+def task_bili_update_all(urls: list, db_fp: str, update_videos: bool = False):
+    """更新所有指定的B站UP主的视频信息。
+
+    参数:
+        urls (list): UP主空间页面的URL列表。
+        db_fp (str): 数据库文件路径。
+        update_videos (bool): 是否更新视频信息，默认为False。
+    """
     if len(urls) == 0:
         return
     db = DataBase()
@@ -279,6 +292,8 @@ def task_bili_update_all(urls: list, db_fp: str):
         wd.setTabPageTitle(f"{index+1} / {len(urls)} " + wd._driver.title)
         wd.xpath_wait(videoinfo_xpath)
         insert_up(db, parse_spacePage(wd))
+        if not update_videos:
+            continue
         up_id = str(match_upspace(wd._driver.current_url))
         l.info(f"该up视频总数应为：\t{int(get_up_info(db, up_id).iloc[0]['up_sum'])}")
         l.info(f"现有视频总数为：\t{len(get_allvideoinfo_byupid(db, up_id))}")
