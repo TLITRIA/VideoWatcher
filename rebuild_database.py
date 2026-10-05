@@ -85,14 +85,14 @@ if __name__ == "__main__":
     with timeblock("BiliBili") as tb:
         l.info("开始重建BiliBili数据库")
         rebuild_bilibili(db, default_db_fp)
-    l.info(f"重建BiliBili数据库耗时{tb['elapsed']}秒")
+    l.info(f"重建BiliBili数据库耗时{generate_duration_string(int(tb['elapsed']))}")
 
     # ==================================== #
     # Ytb
     with timeblock("Youtube") as tb:
         l.info("开始重建Youtube数据库")
         rebuild_youtube(db, default_db_fp)
-    l.info(f"重建Youtube数据库耗时{tb['elapsed']}秒")
+    l.info(f"重建Youtube数据库耗时{generate_duration_string(int(tb['elapsed']))}")
     # ==================================== #
     db.Disconnect()
     l.info(logEnd())

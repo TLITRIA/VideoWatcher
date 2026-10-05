@@ -135,3 +135,12 @@ def create_zip(from_path: str, to_path: str)->bool:
     with zipfile.ZipFile(to_path, 'w', zipfile.ZIP_LZMA) as zipf:
         zipf.write(from_path, arcname=os.path.basename(from_path))
     return os.path.exists(to_path)
+
+def generate_duration_string(seconds: int) -> str:
+    """
+    将秒数转换为小时:分钟:秒的字符串格式。
+    """
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+    return f"{hours}:{minutes:02}:{seconds:02}"

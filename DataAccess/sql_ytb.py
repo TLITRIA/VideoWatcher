@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS ytbup(
     face TEXT, -- up主头像
     data_time INT, -- up自身数据更新时间
     tag_time INT, -- tag更新时间
+    up_sum INT, -- up主上传视频数
     latest_video_id TEXT, -- 最新视频id
     latest_stream_id TEXT, -- 最新直播id
     last_update_video_time INT, -- up视频数据更新时间
@@ -109,7 +110,15 @@ def ytb_get_up_unfilled(db: DataBase) -> list:
 
 
 def ytb_get_allvideoinfo_byupid(db: DataBase, up_id: str) -> pd.DataFrame:
-    return get_allvideoinfo_byupid(db, up_id)
+    return get_allvideoinfo_byupid(db, up_id, "ytbvideo")
+
+
+def ytb_get_oldestvideoinfo_byupid(db: DataBase, up_id: str) -> pd.DataFrame:
+    if not db.isConnected or up_id == "":
+        return pd.DataFrame()
+    sql = f"SELECT * FROM ytbvideo WHERE up_id IS '{up_id}' ORDER BY upload;"
+    df = pd.read_sql_query(sql, db.conn)
+    return df
 
 
 def judge_ytbUp_needupdate(db: DataBase, up_id: str) -> bool:
@@ -132,5 +141,9 @@ def judge_ytbUp_needupdate(db: DataBase, up_id: str) -> bool:
     if series["latest_video_id"] and (not df["latest_video_id"].isin([series["latest_video_id"]]).any()):
         return True
     if series["latest_stream_id"] and (not df["latest_stream_id"].isin([series["latest_stream_id"]]).any()):
+        return True
+    if len(df) < 10:  # 数量稀少
+        return True
+    if series["up_sum"] and int(series["up_sum"]) > 2 * len(df):  # 视频数量少于一定值
         return True
     return False
