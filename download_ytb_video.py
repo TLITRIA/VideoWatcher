@@ -14,11 +14,12 @@ if __name__ == "__main__":
 
     upids = get_all_up_id(db, "ytbup")
     csvids = []
-    # 更新所有视频
-    
-    #
     with open(abspath("./.cache/ytb_download_all.csv"), "r", encoding="utf-8") as f:
         csvids = f.read().splitlines()
+    
+    # 更新up相关信息
+    
+    # 下载视频
 
     tmplist = []
     for upid in upids:

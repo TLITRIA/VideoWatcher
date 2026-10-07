@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS ytbup(
     up_sum INT, -- up主上传视频数
     latest_video_id TEXT, -- 最新视频id
     latest_stream_id TEXT, -- 最新直播id
+    latest_short_id TEXT, -- 最新短视频id
     last_update_video_time INT, -- up视频数据更新时间
     PRIMARY KEY (up_id)
 );""",
@@ -40,9 +41,8 @@ CREATE TABLE IF NOT EXISTS ytbvideo(
     tag_time INT, -- tag更新时间
     PRIMARY KEY (v_id)
 );""",
-    # 注意该表存放的是广义上的视频：直播/短视频/视频都视为视频
-    # 不搞视频tag表，而是在浏览时直接下载
     # 不搞排除表
+    # 油管shorts视频链接与videos streams链接的格式不同
 ]
 
 
@@ -100,8 +100,10 @@ def ytb_get_up_unfilled(db: DataBase) -> list:
         "OR intro IS NULL "
         "OR face IS NULL "
         "OR data_time IS NULL "
-        # "OR latest_video_id IS NULL " # 为空是正常的
-        # "OR latest_stream_id IS NULL " # 为空是正常的
+        "OR latest_video_id IS NULL "
+        "OR latest_stream_id IS NULL "
+        "OR latest_short_id IS NULL "
+        "OR up_sum IS NULL "
         "OR last_update_video_time IS NULL;"
     )
     ret = [row[0] for row in db.conn.execute(sql).fetchall() if row[0] != ""]
@@ -122,10 +124,10 @@ def ytb_get_oldestvideoinfo_byupid(db: DataBase, up_id: str) -> pd.DataFrame:
 
 
 def judge_ytbUp_needupdate(db: DataBase, up_id: str) -> bool:
-    df = ytb_get_up_info(db, up_id)
-    if len(df) != 1:
-        return False
-    series = df.iloc[0]
+    updf = ytb_get_up_info(db, up_id)
+    if len(updf) != 1:
+        return False  # 查无此人不处理
+    series = updf.iloc[0]
     if series["up_id"] in ytb_get_up_unfilled(db):
         return True
     if not series["data_time"] or int(series["data_time"]) < get_timestamp() - 60 * 60 * 24 * 7:  # up信息未更新
@@ -135,15 +137,15 @@ def judge_ytbUp_needupdate(db: DataBase, up_id: str) -> bool:
         or int(series["last_update_video_time"]) < get_timestamp() - 60 * 60 * 24 * 7
     ):  # up视频信息未更新
         return True
-    df = get_allvideoinfo_byupid(db, up_id, "ytbup")
-    if df.empty:
-        return True  # 没有视频 不会关注一个没有视频的up主
-    if series["latest_video_id"] and (not df["latest_video_id"].isin([series["latest_video_id"]]).any()):
+    videodf = ytb_get_allvideoinfo_byupid(db, up_id) 
+    if videodf.empty:
         return True
-    if series["latest_stream_id"] and (not df["latest_stream_id"].isin([series["latest_stream_id"]]).any()):
-        return True
-    if len(df) < 10:  # 数量稀少
-        return True
-    if series["up_sum"] and int(series["up_sum"]) > 2 * len(df):  # 视频数量少于一定值
+    if series["latest_video_id"] and (not videodf["v_id"].isin([series["latest_video_id"]]).any()):
+        return True # 最新视频id不在ytbvideo表中
+    if series["latest_stream_id"] and (not videodf["v_id"].isin([series["latest_stream_id"]]).any()):
+        return True # 最新直播id不在ytbvideo表中
+    if series["latest_short_id"] and (not videodf["v_id"].isin([series["latest_short_id"]]).any()):
+        return True # 最新短片id不在ytbvideo表中
+    if series["up_sum"] and int(series["up_sum"]) > len(videodf):  # 视频数量少于up_sum
         return True
     return False

@@ -152,7 +152,7 @@ class MyWebDriver:
                 if domains and kv["domain"] not in domains:
                     continue
                 self._driver.add_cookie(kv)
-            print(f"已读取{len(data)}行cookie：{cookie_fp}")
+            print(f"已读取{len(data)}条cookie：{cookie_fp}")
             self._driver.refresh()
 
         if not func or not args:

@@ -82,9 +82,8 @@ def download_video(
     bv, downfold, cookie="", limit_rate: int = 0, possible_title: str = ""
 ) -> subprocess.CompletedProcess:
     """下载B站视频"""
-    url = BV2url(bv)
     if os.path.exists(downfold):
-        if scan_foldsize(downfold) > 0:
+        if scan_foldsize(downfold) > 0:  # TODO 判断已下载的逻辑，需要更进一步的验证
             print(f"文件夹 {downfold} 已存在且不为空，跳过下载")
             return subprocess.CompletedProcess(args=[], returncode=0)
     else:
@@ -92,8 +91,7 @@ def download_video(
 
     cmd = ["yt-dlp"]
     cmd.extend(["--no-check-certificate"] if cookie == "" else ["--cookies", cookie])  # 使用cookie
-    if limit_rate > 0:
-        cmd.extend(["-r", f"{limit_rate}m"])  # 限速
+    cmd.extend(["-r", f"{limit_rate}m"] if limit_rate > 0 else [])  # 限速
     # TODO 画质选择
     cmd.append("-i")
     cmd.extend(["-o", f"{downfold}%(title)s.%(ext)s"])  # 输出格式
@@ -103,10 +101,11 @@ def download_video(
     cmd.extend(["--convert-subs", "srt"])
     cmd.extend(["-o", f"subtitle:{downfold}%(title)s.%(ext)s"])
 
-    cmd.append(url)
+    cmd.append(BV2url(bv))
     print(cmd)
-    result = subprocess.run(cmd, shell=True, stdout=sys.stdout, stderr=sys.stderr, text=True)
-    time.sleep(5)
+    # result = subprocess.run(cmd, shell=True, stdout=sys.stdout, stderr=sys.stderr, text=True)
+    result = subprocess.run(cmd)
+    time.sleep(5)  # TODO magic number 防止过快下载导致被封IP
     return result
 
 

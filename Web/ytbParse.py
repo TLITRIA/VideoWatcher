@@ -9,6 +9,7 @@ from Web.ytbAccess import *
 
 
 def parse_ytb_latestvid(wd: MyWebDriver) -> str:
+    """video stream"""
     latest_video_id = ""
     nodes = wd.xpath_wait(f"//ytd-rich-item-renderer")
     if len(nodes) != 0:
@@ -16,6 +17,16 @@ def parse_ytb_latestvid(wd: MyWebDriver) -> str:
         if len(_nodes):
             latest_video_id = match_ytb_vid_byUrl(str(_nodes[0].get_attribute("href")))
     return latest_video_id
+
+
+def parse_ytb_latestshort_vid(wd: MyWebDriver) -> str:
+    v_id = ""
+    nodes = wd.xpath_wait(f"//ytd-rich-item-renderer")
+    if len(nodes) != 0:
+        _nodes = xpath(nodes[0], ".//a[@href and @title]")
+        if len(_nodes):
+            v_id = match_ytb_vid_byShortUrl(str(_nodes[0].get_attribute("href")))
+    return v_id
 
 
 def parse_YtbUp(wd: MyWebDriver, db: DataBase, other: list = []):
@@ -41,7 +52,8 @@ def parse_YtbUp(wd: MyWebDriver, db: DataBase, other: list = []):
     info.append(url)
     cols.append("url")
     hasVideos = bool(len(wd.xpath_wait(f"//yt-tab-shape[@tab-title='视频']")))
-    hasStreams = len(wd.xpath_wait(f"//yt-tab-shape[@tab-title='直播']"))
+    hasStreams = bool(len(wd.xpath_wait(f"//yt-tab-shape[@tab-title='直播']")))
+    hasShorts = bool(len(wd.xpath_wait(f"//yt-tab-shape[@tab-title='Shorts']")))
     try:
         nodes = wd.xpath_wait("//yt-dynamic-text-view-model")
         if len(nodes):
@@ -76,33 +88,59 @@ def parse_YtbUp(wd: MyWebDriver, db: DataBase, other: list = []):
         l.error(traceback.format_exc())
     df = pd.DataFrame(data=[info], columns=cols)
     ytb_insert_up(db, df)
-    # ======================================= #
+    # 视频id
     updf = ytb_get_up_info(db, up_id)
     if len(updf) != 0:
-        if hasVideos:  # videos
+        latest_video_id = ""
+        if hasVideos:
             wd.Goto(f"https://www.youtube.com/@{up_id}/videos")
             time.sleep(10)
             nodes = wd.xpath_wait(f"//ytd-rich-item-renderer")
-            updf.loc[0, "latest_video_id"] = parse_ytb_latestvid(wd)
-            if "视频" in other:
-                df = parse_YtbVideos(wd)
-                if len(df) != 0:
-                    ytb_insert_video(db, df)
-                    l.info(f"{up_id} 已读取视频共 {len(df)} 条")
-
-        if hasStreams:  # streams
+            latest_video_id = parse_ytb_latestvid(wd)
+        updf.loc[0, "latest_video_id"] = latest_video_id
+        latest_stream_id = ""
+        if hasStreams:
             wd.Goto(f"https://www.youtube.com/@{up_id}/streams")
             time.sleep(10)
             nodes = wd.xpath_wait(f"//ytd-rich-item-renderer")
-            updf.loc[0, "latest_stream_id"] = parse_ytb_latestvid(wd)
-            if "直播" in other and hasStreams:
-                df = parse_YtbVideos(wd, 2)
-                if len(df) != 0:
-                    ytb_insert_video(db, df)
-                    l.info(f"{up_id} 已读取直播共 {len(df)} 条")
-
-        updf.loc[0, "last_update_video_time"] = get_timestamp()
+            latest_stream_id = parse_ytb_latestvid(wd)
+        updf.loc[0, "latest_stream_id"] = latest_stream_id
+        latest_short_id = ""
+        if hasShorts:
+            wd.Goto(f"https://www.youtube.com/@{up_id}/shorts")
+            time.sleep(10)
+            nodes = wd.xpath_wait(f"//ytd-rich-item-renderer")
+            latest_short_id = parse_ytb_latestshort_vid(wd)
+        updf.loc[0, "latest_short_id"] = latest_short_id
+    updf.loc[0, "last_update_video_time"] = get_timestamp()
     ytb_insert_up(db, updf)
+    # ======================================= #
+    if len(other) == 0:
+        return
+    if hasVideos and "视频" in other:  # videos
+        wd.Goto(f"https://www.youtube.com/@{up_id}/videos")
+        time.sleep(10)
+        nodes = wd.xpath_wait(f"//ytd-rich-item-renderer")
+        df = parse_YtbVideos(wd)
+        if len(df) != 0:
+            ytb_insert_video(db, df)
+            l.info(f"{up_id} 已读取视频共 {len(df)} 条")
+    if hasStreams and "直播" in other:  # streams
+        wd.Goto(f"https://www.youtube.com/@{up_id}/streams")
+        time.sleep(10)
+        nodes = wd.xpath_wait(f"//ytd-rich-item-renderer")
+        df = parse_YtbVideos(wd, 2)
+        if len(df) != 0:
+            ytb_insert_video(db, df)
+            l.info(f"{up_id} 已读取直播共 {len(df)} 条")
+    if hasShorts and "Shorts" in other:  # shorts
+        wd.Goto(f"https://www.youtube.com/@{up_id}/shorts")
+        time.sleep(10)
+        nodes = wd.xpath_wait(f"//ytd-rich-item-renderer")
+        df = parse_YtbShorts(wd)
+        if len(df) != 0:
+            ytb_insert_video(db, df)
+            l.info(f"{up_id} 已读取短视频共 {len(df)} 条")
 
 
 def parse_YtbVideos(wd: MyWebDriver, ytbtype: int = 1) -> pd.DataFrame:
@@ -120,7 +158,7 @@ def parse_YtbVideos(wd: MyWebDriver, ytbtype: int = 1) -> pd.DataFrame:
     nodes = wd.xpath_wait("//ytd-rich-item-renderer")
     for i, node in enumerate(reversed(nodes)):
         print(
-            f"\r解析当前页的视频列表：{float((i+1) / len(nodes)) * 100:.2f}%", end="" if i + 1 != len(nodes) else "\n"
+            f"\r{wd._driver.current_url} 解析当前页的视频列表：{float((i+1) / len(nodes)) * 100:.2f}%", end="" if i + 1 != len(nodes) else "\n"
         )
         info = []
         cols = []
@@ -140,12 +178,15 @@ def parse_YtbVideos(wd: MyWebDriver, ytbtype: int = 1) -> pd.DataFrame:
             cols.append("ytbtype")
             info.append(up_id)
             cols.append("up_id")
-            title = xpath(
+
+            _nodes = xpath(
                 node,
                 ".//span[@class='ytAttributedStringHost ytAttributedStringWhiteSpacePreWrap']",
-            )[0].text
-            info.append(title)
-            cols.append("title")
+            )
+            if len(_nodes):
+                title = _nodes[0].text
+                info.append(title)
+                cols.append("title")
 
             upload_string = ""
             for _node in xpath(
@@ -155,7 +196,7 @@ def parse_YtbVideos(wd: MyWebDriver, ytbtype: int = 1) -> pd.DataFrame:
                 if "前" in _node.text:
                     upload_string = _node.text
                     break
-            info.append(parse_ytbUploadStamp(upload_string))
+            info.append(parse_ytbUploadStamp(upload_string))  # TODO 如何获取具体的发布时间？
             cols.append("upload")
 
             play = 0
@@ -193,7 +234,68 @@ def parse_YtbVideos(wd: MyWebDriver, ytbtype: int = 1) -> pd.DataFrame:
     return df
 
 
-def task_update_ytb_database(urls: list, db_fp: str, ytb_types: list = ["视频", "直播"]):
+def parse_YtbShorts(wd: MyWebDriver) -> pd.DataFrame:
+    """
+    解析油管shorts页面列表
+    """
+    if wd._isQuit or not hasattr(wd, "_driver") or not match_ytb_shorts(wd._driver.current_url):
+        return pd.DataFrame()
+    l = Logger()
+    df = pd.DataFrame()
+    up_id = match_ytb_upid(wd._driver.current_url)
+    ytb_scroll_to_bottom(wd)
+    nodes = wd.xpath_wait("//ytd-rich-item-renderer")
+    for i, node in enumerate(reversed(nodes)):
+        print(
+            f"\r{wd._driver.current_url} 解析当前页的视频列表：{float((i+1) / len(nodes)) * 100:.2f}%", end="" if i + 1 != len(nodes) else "\n"
+        )
+        info = []
+        cols = []
+        try:
+
+            _nodes = xpath(node, ".//a[@href and @class='shortsLockupViewModelHostEndpoint reel-item-endpoint']")
+            if len(_nodes):
+                url = str(_nodes[0].get_attribute("href"))
+                info.append(url)
+                cols.append("url")
+                v_id = match_ytb_vid_byShortUrl(url)
+                info.append(v_id)
+                cols.append("v_id")
+                cover = f"https://i.ytimg.com/vi/{v_id}/oardefault.jpg"
+                info.append(cover)
+                cols.append("cover")
+            info.append(3)
+            cols.append("ytbtype")
+            info.append(up_id)
+            cols.append("up_id")
+            _nodes = xpath(
+                node,
+                ".//span[@class='ytAttributedStringHost ytAttributedStringWhiteSpacePreWrap']",
+            )
+            if len(_nodes):
+                title = _nodes[0].text
+                info.append(title)
+                cols.append("title")
+                play = parse_ytbPlaytimes(_nodes[1].text.split("次观看")[0])
+                info.append(play)
+                cols.append("play")
+                
+            info.append(get_timestamp())
+            cols.append("data_time")
+
+        except Exception as e:
+            print("+" * 80)
+            print(f"ERROR: {i+1} / {len(nodes)} in {wd._driver.current_url}")
+            traceback.print_exc()
+            print("+" * 80)
+            l.error(f"ERROR: {i+1} / {len(nodes)} in {wd._driver.current_url}")
+            l.error(traceback.format_exc())
+        tmp_df = pandas.DataFrame(data=[info], columns=cols)
+        df = pandas.concat([df, tmp_df])
+    return df
+
+
+def task_update_ytb_database(urls: list, db_fp: str, ytb_types: list = ["视频", "直播", "Shorts"]):
     """更新数据库"""
     if len(urls) == 0 or db_fp == "":
         return

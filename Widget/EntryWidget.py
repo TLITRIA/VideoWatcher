@@ -11,6 +11,7 @@ from Widget.DbWidget import DbWidget
 from Web.MyWebDriver import MyWebDriver
 from Web.biliParse import *
 from Web.biliAccess import *
+from Web.ytbParse import *
 from Common.match_bili import *
 from Common.Process import *
 from DataAccess.sql_bilibili import *
@@ -23,14 +24,8 @@ class EntryWidget(QWidget, Ui_Form):
     def on_update_fillup(self):
         if not self._db.isConnected:
             return
-        up_unfilled = get_up_unfilled(self._db)
-        up_ids = []
-        for i, up_id in enumerate(get_all_up_id(self._db, "up")):
-            # print(f"\r正在确认第{i+1}个UP主是否需要更新...", end="")
-            if up_id in up_unfilled:
-                up_ids.append(up_id)
-        print()
-        urls = [f"https://space.bilibili.com/{x}/upload/video" for x in up_ids]
+        urls = [f"https://space.bilibili.com/{x}/upload/video" for x in get_up_unfilled(self._db)]
+        random.shuffle(urls)
         if len(urls) > 0:
             pm = ProcessManager()
             pm.AddTask(task_bili_update_all, *[urls, default_db_fp, False])
@@ -38,8 +33,8 @@ class EntryWidget(QWidget, Ui_Form):
     def on_update_allup(self):
         if not self._db.isConnected:
             return
-        up_ids = get_all_up_id(self._db, "up")
-        urls = [f"https://space.bilibili.com/{x}/upload/video" for x in up_ids]
+        urls = [f"https://space.bilibili.com/{x}/upload/video" for x in get_all_up_id(self._db, "up")]
+        random.shuffle(urls)
         if len(urls) > 0:
             pm = ProcessManager()
             pm.AddTask(task_bili_update_all, *[urls, default_db_fp, False])
@@ -49,14 +44,46 @@ class EntryWidget(QWidget, Ui_Form):
             return
         up_ids = []
         for i, up_id in enumerate(get_all_up_id(self._db, "up")):
-            print(f"\r正在确认第{i+1}个UP主是否需要更新...", end="")
-            ret = judge_bilibiliUP_needupdate(self._db, up_id)
+            ret = judge_bilibiliUP_needupdate(self._db, up_id)  # 减少工作量
             if ret != 0:
                 up_ids.append(up_id)
         urls = [f"https://space.bilibili.com/{x}/upload/video" for x in up_ids]
+        random.shuffle(urls)
         if len(urls) > 0:
             pm = ProcessManager()
             pm.AddTask(task_bili_update_all, *[urls, default_db_fp, True])
+
+    def on_click_ytb_fillup(self):
+        if not self._db.isConnected:
+            return
+        urls = [f"https://www.youtube.com/@{x}" for x in ytb_get_up_unfilled(self._db)]
+        random.shuffle(urls)
+        if len(urls) > 0:
+            pm = ProcessManager()
+            pm.AddTask(task_update_ytb_database, *[urls, default_db_fp, []])
+
+    def on_click_ytb_allup(self):
+        if not self._db.isConnected:
+            return
+        urls = [f"https://www.youtube.com/@{x}" for x in get_all_up_id(self._db, "ytbup")]
+        random.shuffle(urls)
+        if len(urls) > 0:
+            pm = ProcessManager()
+            pm.AddTask(task_update_ytb_database, *[urls, default_db_fp, []])
+
+    def on_click_ytb_rebuild(self):
+        if not self._db.isConnected:
+            return
+        up_ids = []
+        for i, up_id in enumerate(get_all_up_id(self._db, "ytbup")):
+            ret = judge_ytbUp_needupdate(self._db, up_id)  # 减少工作量
+            if ret != 0:
+                up_ids.append(up_id)
+        urls = [f"https://www.youtube.com/@{x}" for x in up_ids]
+        random.shuffle(urls)
+        if len(urls) > 0:
+            pm = ProcessManager()
+            pm.AddTask(task_update_ytb_database, *[urls, default_db_fp])
 
     def on_click_defaultplaylist(self):
         goto_default_collectfolder(self._wd)

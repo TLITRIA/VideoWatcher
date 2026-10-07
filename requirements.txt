@@ -5,8 +5,13 @@ pyinstaller
 PyQt6
 PySide6
 ipdb
-yt-dlp
 matplotlib
 numpy
 black
 sqlalchemy
+
+yt-dlp
+curl_cffi
+deno
+bgutil-ytdlp-pot-provider
+riplet
