@@ -52,14 +52,12 @@ class PlayListWidget(QWidget, Ui_Form):
             w: InfoWidget = item.widget()
             if exist_up(DataBase(), w._up_id) or exist_up_exclude(DataBase(), w._up_id):
                 data.append([w._v_id, w._fold_name])
-                w.s_del_infoW.emit(w)
+                w.del_itself()
         pm = ProcessManager()
         pm.AddTask(remove_video_fromFold, *[data])
 
     def del_infoW(self, w: InfoWidget):
         self.flow_layout.removeWidget(w)
-        w.isDeleted = True
-        w.deleteLater()
         self.update_playlist_number()
 
     def __init__(self, parent=None):
@@ -77,23 +75,13 @@ class PlayListWidget(QWidget, Ui_Form):
         self.remove_allFlowLayout()
         for i in range(len(playlist_df)):
             w = InfoWidget(self)
-
             face = ""
             up_df = get_up_info(DataBase(), playlist_df["up_id"].iloc[i])
             if up_df.shape[0]:
                 face = up_df["face"][0]
-
-            df = playlist_df.iloc[i]
-            df["face"] = face
-            args = [
-                playlist_df["v_id"].iloc[i],
-                playlist_df["up_id"].iloc[i],
-                playlist_df["title"].iloc[i],
-                playlist_df["up_name"].iloc[i],
-                face,
-                playlist_df["cover"].iloc[i],
-            ]
-            w.series_update_all(df)
+            wdf = playlist_df.iloc[i]
+            wdf["face"] = face
+            w.series_update_all(wdf)
             w.set_fold_name(playlist_df["fold_name"].iloc[i])
             w.setFixedSize(260, 155)
             self.flow_layout.addWidget(w)

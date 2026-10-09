@@ -39,7 +39,9 @@ class MyWebDriver:
             # '--window-size=1920,1080',
             "--ignore-certificate-errors",  # 忽略证书错误
             "--start-maximized",  # 启动时最大化
+            # "--disable-features=LockProfileCookieDatabase",  # 禁用锁定的cookie数据库
         ]
+        self.hasHeadless = False
 
     def __del__(self):
         if not self._isQuit:
@@ -59,6 +61,9 @@ class MyWebDriver:
         self._driver_wait = WebDriverWait(self._driver, 7)
         self._driver.implicitly_wait(2)
         self._isQuit = False
+        self.hasHeadless = "--headless" in self.selenium_options
+        if self.hasHeadless:
+            self._driver.minimize_window()
 
     def Quit(self):
         if not self._isQuit:
@@ -73,11 +78,14 @@ class MyWebDriver:
             if self._driver.current_url != url:
                 with timeblock(f"Goto({url})"):
                     self._driver.get(url)
-        except WebDriverException as e: # TODO 连接超时的处理
+        except WebDriverException as e:  # TODO 连接超时的处理
             try:
                 self._driver.get(url)
             except Exception as e:
                 print(e)
+        except Exception as e:
+            self._driver.refresh()
+            self._driver.get(url)
         return self._driver
 
     def xpath_findall(self, xp):
@@ -141,10 +149,6 @@ class MyWebDriver:
         args=None,
     ):
         self.Quit()
-        hasHeadless = "--headless" in self.selenium_options
-        if hasHeadless:
-            self.selenium_options.remove("--headless")
-
         self.Goto(url)
         if os.path.exists(cookie_fp):
             data = readjson(cookie_fp)
@@ -178,11 +182,6 @@ class MyWebDriver:
                 with open(cookie_ytdlp_fp, "w") as fw:
                     fw.write("# Netscape HTTP Cookie File\n" + content)
 
-        if hasHeadless:
-            self.selenium_options.append("--headless")
-            self.Quit()
-            self.Goto(url)
-
     def ScrollToBottomAndBack(self):
         if self._isQuit:
             return
@@ -197,7 +196,6 @@ class MyWebDriver:
         """
         强制转到第一个窗口
         """
-        print("转到第一个窗口")
         if not self._isQuit and hasattr(self, "_driver") and len(self._driver.window_handles):
             self._driver.switch_to.window(self._driver.window_handles[0])
 

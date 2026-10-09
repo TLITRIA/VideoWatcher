@@ -10,7 +10,7 @@ def ytb_scroll_to_bottom(wd: MyWebDriver):
         body = wd._driver.find_element(By.TAG_NAME, "body")
         for _ in range(2):
             body.send_keys(Keys.END)
-        time.sleep(4)
+        time.sleep(5)
 
 
 def ytb_download_video(
@@ -23,22 +23,24 @@ def ytb_download_video(
     else:
         g_mkdir_byfp(downfold)
 
-    cmd = ["yt-dlp"]  # TODO .conf
+    cmd = ["yt-dlp"]
     cmd.extend(["-vU"])  # 调试信息
-    # cmd.extend(["--impersonate", "chrome"])  # curl_cffi
+    cmd.extend(["--impersonate", "edge"])  # curl_cffi
     # cmd.extend(["--socket-timeout", "60"])
     # cmd.extend(["-f", "bestvideo+bestaudio"])
     cmd.extend(["-o", f"{downfold}%(title)s.%(ext)s"])
-    cmd.extend(["--no-playlist"])
-    cmd.extend(["--limit-rate", f"{limit_rate}M"] if limit_rate > 0 else [])
+    # cmd.extend(["--no-playlist"])
+    # cmd.extend(["--limit-rate", f"{limit_rate}M"] if limit_rate > 0 else [])
     # cmd.extend(["--merge-output-format", "mp4"])
     cmd.extend(["--extractor-args", 'youtube:player_client=tv,mweb'])
     cmd.extend(["--cookies", cookie] if cookie != "" else [])
+    # cmd.extend(['--cookies-from-browser', f'edge:{edge_profile_path}'])
+    
     cmd.append("-i")
-    cmd.extend(["--write-subs", "--write-auto-subs"])
-    cmd.extend(["--sub-langs", "en,zh-Hans,ai-zh,ai-en"])
-    cmd.extend(["--convert-subs", "srt"])
-    cmd.extend(["-o", f"subtitle:{downfold}%(title)s.%(ext)s"])
+    # cmd.extend(["--write-subs", "--write-auto-subs"])
+    # cmd.extend(["--sub-langs", "en,zh-Hans,ai-zh,ai-en"])
+    # cmd.extend(["--convert-subs", "srt"])
+    # cmd.extend(["-o", f"subtitle:{downfold}%(title)s.%(ext)s"])
     cmd.append(f"https://www.youtube.com/watch?v={vid}")
     print(cmd)
     result = subprocess.run(cmd, shell=True, stdout=sys.stdout, stderr=sys.stderr, text=True)

@@ -17,15 +17,12 @@ class InfoFuncDialog(QDialog, Ui_Dialog):
         self.iw = w
 
     def on_remove_widget(self):
-        self.iw.s_del_infoW.emit(self.iw)
+        self.iw.del_itself()
         self.close()
 
     def on_remove_video(self):
         if not self.iw._fold_name:
             return
         pm: ProcessManager = ProcessManager()
-        pm.AddTask(
-            remove_video_fromFold,
-            *[[[self.iw._v_id, self.iw._fold_name]]]
-        )
+        pm.AddTask(remove_video_fromFold, *[[[self.iw._v_id, self.iw._fold_name]]])
         self.on_remove_widget()

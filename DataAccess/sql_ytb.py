@@ -137,15 +137,15 @@ def judge_ytbUp_needupdate(db: DataBase, up_id: str) -> bool:
         or int(series["last_update_video_time"]) < get_timestamp() - 60 * 60 * 24 * 7
     ):  # up视频信息未更新
         return True
-    videodf = ytb_get_allvideoinfo_byupid(db, up_id) 
+    videodf = ytb_get_allvideoinfo_byupid(db, up_id)
     if videodf.empty:
         return True
     if series["latest_video_id"] and (not videodf["v_id"].isin([series["latest_video_id"]]).any()):
-        return True # 最新视频id不在ytbvideo表中
+        return True  # 最新视频id不在ytbvideo表中
     if series["latest_stream_id"] and (not videodf["v_id"].isin([series["latest_stream_id"]]).any()):
-        return True # 最新直播id不在ytbvideo表中
+        return True  # 最新直播id不在ytbvideo表中
     if series["latest_short_id"] and (not videodf["v_id"].isin([series["latest_short_id"]]).any()):
-        return True # 最新短片id不在ytbvideo表中
-    if series["up_sum"] and int(series["up_sum"]) > len(videodf):  # 视频数量少于up_sum
+        return True  # 最新短片id不在ytbvideo表中
+    if series["up_sum"] and int(series["up_sum"]) - len(videodf) > 10:  # 视频数量少于up_sum
         return True
     return False

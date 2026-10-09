@@ -1,9 +1,10 @@
-from UI.infoFrom import Ui_Form
+from UI.infoForm import Ui_Form
 import os, sys
 import pandas as pd
+
 from os.path import abspath
 from ipdb import set_trace as st
-
+from PyQt6 import sip
 from PyQt6.QtWidgets import QWidget, QCompleter, QComboBox, QDialog
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import pyqtSignal, Qt, QStringListModel
@@ -23,18 +24,17 @@ def qcompleter_init(comp: QCompleter, tar: QComboBox):
 
 
 class InfoWidget(QWidget, Ui_Form):
-    _v_id: str = ""
-    _up_id: str = ""
-    _up_name: str = ""
-    db: DataBase = DataBase()
-    wd: MyWebDriver = MyWebDriver()
-
-    isBlocked: bool = False
-    isDeleted: bool = False
-    up_select: list = []
-    up_unselect: list = []
-    v_select: list = []
-    v_unselect: list = []
+    _v_id: str
+    _up_id: str
+    _up_name: str
+    db: DataBase
+    wd: MyWebDriver
+    isBlocked: int
+    isDeleted: bool
+    up_select: list
+    up_unselect: list
+    v_select: list
+    v_unselect: list
 
     s_toolbar = pyqtSignal(QWidget)  # 自定义工具对话框，内容什么由上一级控件决定
     s_del_infoW = pyqtSignal(QWidget)  # 删除控件的信号
@@ -68,21 +68,15 @@ class InfoWidget(QWidget, Ui_Form):
         self.update_video_tags()
 
     def on_up_tristate(self, state: Qt.CheckState):
-        if self.isBlocked:
+        if self.isBlocked != 0 or self.isDeleted:
             return
-        update_one_up_exclude(
-            self.db,
-            self._up_id,
-            "",
-            state == Qt.CheckState.Checked,
-            f"https://space.bilibili.com/{self._up_id}/upload/video",
-        )
-
+        if state == Qt.CheckState.Checked:
+            url = f"https://space.bilibili.com/{self._up_id}/upload/video"
+            update_one_up_exclude(self.db, self._up_id, "", True, url)
+        else:
+            delete_up(self.db, self._up_id, "up_exclude")
         if state == Qt.CheckState.PartiallyChecked:
-            if match_upspace(self.wd._driver.current_url):
-                insert_up(self.db, parse_spacePage(MyWebDriver()))
-            else:
-                insert_up_null(self.db, self._up_id)
+            insert_up_null(self.db, self._up_id)
         else:
             delete_up(self.db, self._up_id)
         self.im.update_up_collection(self._up_id, state)
@@ -102,13 +96,28 @@ class InfoWidget(QWidget, Ui_Form):
         delete_up_tag(self.db, self._up_id, tag)
         self.update_up_tags()
 
-    def del_infoW(self):
+    def del_itself(self):
+        self.isBlocked += 1
         self.isDeleted = True
+        # print(f"已设置w({self._v_id}).isDeleted 为 True")
         self.s_del_infoW.emit(self)
+        self.deleteLater()
 
     def __init__(self, parent=None):
         super(InfoWidget, self).__init__(parent)
         self.setupUi(self)
+        self._v_id: str = ""
+        self._up_id: str = ""
+        self._up_name: str = ""
+        self.db: DataBase = DataBase()
+        self.wd: MyWebDriver = MyWebDriver()
+        self.isBlocked: int = 0
+        self.isDeleted: bool = False
+        self.up_select: list = []
+        self.up_unselect: list = []
+        self.v_select: list = []
+        self.v_unselect: list = []
+
         self.cb_add_up.setEditable(True)
         self.cb_add_v.setEditable(True)
 
@@ -119,14 +128,11 @@ class InfoWidget(QWidget, Ui_Form):
         self.cb_del_up.installEventFilter(self.wheelblocker)
         self.cb_del_v.installEventFilter(self.wheelblocker)
 
-        
-
     def __del__(self):
         self.im.REMOVE(self)  # 从同步中删除
-        self.isDeleted = True
 
     def series_update_all(self, series: pd.Series):
-        '''# TODO: 重写'''
+        """# TODO: 重写"""
         self.update_all(
             v_id=("" if "v_id" not in series.index.tolist() else str(series["v_id"])),
             up_id=("" if "up_id" not in series.index.tolist() else str(series["up_id"])),
@@ -137,7 +143,7 @@ class InfoWidget(QWidget, Ui_Form):
         )
 
     def update_all(self, v_id, up_id, title, up_name, face="", cover=""):
-        '''# TODO: 重写'''
+        """# TODO: 重写"""
         if self._up_id:
             self.im.REMOVE(self)  # 每一次更新都要重新添加到同步管理器
         self._v_id = v_id  # 如果为None
@@ -163,9 +169,11 @@ class InfoWidget(QWidget, Ui_Form):
                 cover = df["cover"][0]
         if cover:
             register_webImg(self.v_cover, cover)
+        self.isBlocked += 1
         self.update_up_tags()
         self.update_video_tags()
         self.update_up_collection()
+        self.isBlocked -= 1
 
     def set_fold_name(self, fold_name):
         self._fold_name = fold_name
@@ -179,10 +187,10 @@ class InfoWidget(QWidget, Ui_Form):
         self.up_unselect = unselect
         self.cb_add_up.clear()
         self.cb_add_up.addItems(self.up_unselect)
+        self.cb_add_up.clearEditText()
         self.cb_del_up.clear()
         self.cb_del_up.addItems(self.up_select)
-        # self.cb_del_up.clearEditText()
-        self.cb_add_up.clearEditText()
+        self.cb_del_up.clearEditText()
         if not self.isBlocked:
             self.im.update_up_tags(self._up_id, select, unselect)
 
@@ -202,9 +210,7 @@ class InfoWidget(QWidget, Ui_Form):
     def update_up_collection(self, state=None):
         if state is None:
             state = get_up_collection_state(self.db, self._up_id)
-        self.isBlocked = True
         self.cb_upselect.setCheckState(state)
-        self.isBlocked = False
 
     def on_click_toolbut(self):
         self.s_toolbar.emit(self)
@@ -228,15 +234,11 @@ class InfoWidget(QWidget, Ui_Form):
             table = self.up_id_table.get(up_id, [])
             for i in range(len(table) - 1, -1, -1):
                 w: InfoWidget = table[i]
-                if w.isDeleted:
-                    table.pop(i)  # TODO 注意到有两种删除的途径
+                if w.isBlocked != 0 or w.isDeleted or w._up_id != up_id:
                     continue
-                if w._up_id != up_id:
-                    continue
-                w.isBlocked = True
+                w.isBlocked += 1
                 w.update_up_tags(select, unselect)
-                w.isBlocked = False
-            # print(统计总览) 查看是否正确释放
+                w.isBlocked -= 1
 
         def update_up_collection(self, up_id: str, state=None):
             if state == None:
@@ -244,14 +246,17 @@ class InfoWidget(QWidget, Ui_Form):
             table = self.up_id_table.get(up_id, [])
             for i in range(len(table) - 1, -1, -1):
                 w: InfoWidget = table[i]
-                if w.isDeleted:
-                    table.pop(i)
+                if w.isDeleted or w.isBlocked != 0 or w._up_id != up_id:
                     continue
-                if w._up_id != up_id:
+                if sip.isdeleted(w):
+                    print("deleted")
                     continue
-                w.isBlocked = True
-                w.update_up_collection(state)
-                w.isBlocked = False
+                w.isBlocked += 1
+                try:
+                    w.update_up_collection(state)
+                except RuntimeError as e:
+                    print(e)
+                w.isBlocked -= 1
 
     im: InfoWidgetManager = InfoWidgetManager()
 

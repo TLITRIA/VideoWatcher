@@ -23,6 +23,8 @@ def remove_video_fromFold(datalist) -> bool:
     wd = MyWebDriver()
     wd.selenium_options.append("--force-dark-mode")
     wd.selenium_options.append("--mute-audio")
+    wd._generate_driver()
+    wd._driver.minimize_window()
     wd.Login()
     wd._driver.minimize_window()
 

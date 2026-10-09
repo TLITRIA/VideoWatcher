@@ -6,68 +6,66 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>709</width>
-    <height>503</height>
+    <width>530</width>
+    <height>195</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="3" column="2">
-    <widget class="QPushButton" name="pushButton_2">
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;批量删除tag&lt;/p&gt;&lt;p&gt;选取的范围由输入的tag实时变动&lt;/p&gt;&lt;p&gt;不记忆过程中的选择，每次tag改动遗忘上次所选项&lt;/p&gt;&lt;p&gt;确认后更新数据&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="text">
-      <string>批量删除</string>
-     </property>
-    </widget>
+   <item row="3" column="0" colspan="3">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label_bottom">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="but_add_uptags">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;批量添加tag属性&lt;/p&gt;&lt;p&gt;选取的范围由已过滤的结果决定&lt;/p&gt;&lt;p&gt;内部的列表滚动到上方tablewidget相应比例的位置&lt;/p&gt;&lt;p&gt;确认后更新数据&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>批量添加</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="but_del_uptags">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;批量删除tag&lt;/p&gt;&lt;p&gt;选取的范围由输入的tag实时变动&lt;/p&gt;&lt;p&gt;不记忆过程中的选择，每次tag改动遗忘上次所选项&lt;/p&gt;&lt;p&gt;确认后更新数据&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>批量删除</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
-   <item row="0" column="1" colspan="3">
-    <widget class="QComboBox" name="comboBox">
+   <item row="1" column="2">
+    <widget class="QComboBox" name="comboBox_tags_unselected">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;输入选择的tag，以英文分号分割&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>排除一个tag</string>
      </property>
      <property name="editable">
-      <bool>true</bool>
-     </property>
-     <property name="currentText">
-      <string/>
+      <bool>false</bool>
      </property>
     </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QPushButton" name="pushButton">
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;批量添加tag属性&lt;/p&gt;&lt;p&gt;选取的范围由已过滤的结果决定&lt;/p&gt;&lt;p&gt;内部的列表滚动到上方tablewidget相应比例的位置&lt;/p&gt;&lt;p&gt;确认后更新数据&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="text">
-      <string>批量添加</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0" colspan="4">
-    <widget class="QTableWidget" name="tableWidget"/>
-   </item>
-   <item row="3" column="3">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>520</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
    </item>
    <item row="0" column="0">
     <widget class="QLabel" name="label">
@@ -76,15 +74,27 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="1" colspan="3">
-    <widget class="QComboBox" name="comboBox_2">
+   <item row="0" column="2">
+    <widget class="QComboBox" name="comboBox_tags_selected">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;输入反选的tag，以英文分号分割&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>选择一个tag</string>
      </property>
      <property name="editable">
-      <bool>true</bool>
+      <bool>false</bool>
+     </property>
+     <property name="currentText">
+      <string/>
      </property>
     </widget>
+   </item>
+   <item row="2" column="0" colspan="3">
+    <widget class="QTableWidget" name="tableWidget"/>
    </item>
    <item row="1" column="0">
     <widget class="QLabel" name="label_2">
@@ -93,8 +103,109 @@
      </property>
     </widget>
    </item>
+   <item row="0" column="1">
+    <widget class="QLineEdit" name="lineEdit_tags_selected">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;输入选择的tag，以英文分号分割&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLineEdit" name="lineEdit_tags_unselected">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;输入反选的tag，以英文分号分割&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>comboBox_tags_selected</sender>
+   <signal>activated(int)</signal>
+   <receiver>Form</receiver>
+   <slot>on_add_select(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>536</x>
+     <y>19</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>512</x>
+     <y>3</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBox_tags_unselected</sender>
+   <signal>activated(int)</signal>
+   <receiver>Form</receiver>
+   <slot>on_add_unselect(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>566</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>514</x>
+     <y>33</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEdit_tags_selected</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>Form</receiver>
+   <slot>on_lineedit_textchange(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>167</x>
+     <y>16</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>155</x>
+     <y>7</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEdit_tags_unselected</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>Form</receiver>
+   <slot>on_lineedit_textchange(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>212</x>
+     <y>51</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>111</x>
+     <y>34</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tableWidget</sender>
+   <signal>itemChanged(QTableWidgetItem*)</signal>
+   <receiver>Form</receiver>
+   <slot>on_change_oneup_tags(QTableWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>86</x>
+     <y>74</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>57</x>
+     <y>60</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>on_add_select(int)</slot>
+  <slot>on_add_unselect(int)</slot>
+  <slot>on_lineedit_textchange(QString)</slot>
+  <slot>on_change_oneup_tags(QTableWidgetItem*)</slot>
+ </slots>
 </ui>

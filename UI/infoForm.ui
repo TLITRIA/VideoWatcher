@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>298</width>
+    <width>258</width>
     <height>151</height>
    </rect>
   </property>
@@ -110,7 +110,7 @@
         </size>
        </property>
        <property name="styleSheet">
-        <string notr="true">background-color: rgb(255, 255, 255);</string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string>&gt;</string>
@@ -169,7 +169,7 @@
         </size>
        </property>
        <property name="styleSheet">
-        <string notr="true">background-color: rgb(255, 255, 255);</string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string>&gt;</string>
@@ -265,7 +265,7 @@ QCheckBox::indicator:indeterminate {
    <hints>
     <hint type="sourcelabel">
      <x>98</x>
-     <y>14</y>
+     <y>37</y>
     </hint>
     <hint type="destinationlabel">
      <x>257</x>
@@ -281,7 +281,7 @@ QCheckBox::indicator:indeterminate {
    <hints>
     <hint type="sourcelabel">
      <x>109</x>
-     <y>95</y>
+     <y>104</y>
     </hint>
     <hint type="destinationlabel">
      <x>257</x>
@@ -297,7 +297,7 @@ QCheckBox::indicator:indeterminate {
    <hints>
     <hint type="sourcelabel">
      <x>130</x>
-     <y>49</y>
+     <y>67</y>
     </hint>
     <hint type="destinationlabel">
      <x>257</x>
@@ -313,7 +313,7 @@ QCheckBox::indicator:indeterminate {
    <hints>
     <hint type="sourcelabel">
      <x>230</x>
-     <y>59</y>
+     <y>67</y>
     </hint>
     <hint type="destinationlabel">
      <x>257</x>
@@ -345,7 +345,7 @@ QCheckBox::indicator:indeterminate {
    <hints>
     <hint type="sourcelabel">
      <x>203</x>
-     <y>125</y>
+     <y>133</y>
     </hint>
     <hint type="destinationlabel">
      <x>257</x>
@@ -361,7 +361,7 @@ QCheckBox::indicator:indeterminate {
    <hints>
     <hint type="sourcelabel">
      <x>241</x>
-     <y>91</y>
+     <y>100</y>
     </hint>
     <hint type="destinationlabel">
      <x>96</x>
@@ -373,11 +373,11 @@ QCheckBox::indicator:indeterminate {
    <sender>but_quit</sender>
    <signal>clicked()</signal>
    <receiver>Form</receiver>
-   <slot>del_infoW()</slot>
+   <slot>del_itself()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>232</x>
-     <y>21</y>
+     <y>36</y>
     </hint>
     <hint type="destinationlabel">
      <x>227</x>
@@ -393,7 +393,7 @@ QCheckBox::indicator:indeterminate {
    <hints>
     <hint type="sourcelabel">
      <x>175</x>
-     <y>91</y>
+     <y>97</y>
     </hint>
     <hint type="destinationlabel">
      <x>170</x>
@@ -411,7 +411,7 @@ QCheckBox::indicator:indeterminate {
   <slot>on_up_add(int)</slot>
   <slot>on_up_del(int)</slot>
   <slot>on_click_toolbut()</slot>
-  <slot>del_infoW()</slot>
+  <slot>del_itself()</slot>
   <slot>on_up_tristate(Qt::CheckState)</slot>
  </slots>
 </ui>

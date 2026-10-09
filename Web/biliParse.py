@@ -308,7 +308,7 @@ def task_bili_update_all(urls: list, db_fp: str, update_videos: bool = False):
             if ret == 0:
                 break
             l.info(f"up主 {url} 的视频重新爬取, 状况为：{ret}")
-            delete_allvideo_byupid(db, up_id)
+            # delete_allvideo_byupid(db, up_id) 
             wd._driver.refresh() # 刷新以前往分页第一页
             time.sleep(3)
             wd.setTabPageTitle(f"{index+1} / {len(urls)} " + wd._driver.title)

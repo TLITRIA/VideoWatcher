@@ -16,6 +16,9 @@
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="1" column="2">
     <widget class="QPushButton" name="pushButton">
+     <property name="toolTip">
+      <string>1.up已在数据库中的视频从默认收藏中排除</string>
+     </property>
      <property name="text">
       <string>自动清理</string>
      </property>
@@ -53,8 +56,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>666</width>
-          <height>221</height>
+          <width>668</width>
+          <height>233</height>
          </rect>
         </property>
        </widget>
@@ -82,7 +85,7 @@
         <number>10000</number>
        </property>
        <property name="value">
-        <number>100</number>
+        <number>10000</number>
        </property>
       </widget>
      </item>

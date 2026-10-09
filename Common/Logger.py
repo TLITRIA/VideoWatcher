@@ -48,7 +48,7 @@ class Logger:
             with open(log_fp, "w") as f:
                 pass
         if os.path.exists(log_fp) and os.path.isfile(log_fp):
-            file_handler = logging.FileHandler(log_fp, mode="a")
+            file_handler = logging.FileHandler(log_fp, mode="a", encoding="utf-8")
             file_handler.setLevel(logging.DEBUG)
             file_handler.setFormatter(formatter)
             self.logger.addHandler(file_handler)
@@ -144,3 +144,16 @@ def generate_duration_string(seconds: int) -> str:
     minutes = (seconds % 3600) // 60
     seconds = seconds % 60
     return f"{hours}:{minutes:02}:{seconds:02}"
+
+def generate_size_string(bytes: int) -> str:
+    """
+    将字节转换为KB、MB、GB的字符串格式。
+    """
+    if bytes < 1024:
+        return f"{bytes} B"
+    elif bytes < 1024 ** 2:
+        return f"{bytes / 1024:.2f} KB"
+    elif bytes < 1024 ** 3:
+        return f"{bytes / 1024 ** 2:.2f} MB"
+    else:
+        return f"{bytes / 1024 ** 3:.2f} GB"

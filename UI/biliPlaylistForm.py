@@ -29,7 +29,7 @@ class Ui_Form(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 666, 221))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 668, 233))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.gridLayout.addWidget(self.scrollArea, 2, 0, 1, 3)
@@ -40,7 +40,7 @@ class Ui_Form(object):
         self.gridLayout.addItem(spacerItem1, 0, 2, 1, 1)
         self.spinBox = QtWidgets.QSpinBox(parent=Form)
         self.spinBox.setMaximum(10000)
-        self.spinBox.setProperty("value", 100)
+        self.spinBox.setProperty("value", 10000)
         self.spinBox.setObjectName("spinBox")
         self.gridLayout.addWidget(self.spinBox, 0, 1, 1, 1)
         self.but_current = QtWidgets.QPushButton(parent=Form)
@@ -57,6 +57,7 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
+        self.pushButton.setToolTip(_translate("Form", "1.up已在数据库中的视频从默认收藏中排除"))
         self.pushButton.setText(_translate("Form", "自动清理"))
         self.label.setText(_translate("Form", "共计 n 个结果"))
         self.but_current.setText(_translate("Form", "当前收藏夹"))

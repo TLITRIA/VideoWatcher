@@ -8,7 +8,7 @@ from Web.biliAccess import *
 
 if __name__ == "__main__":
     pm = ProcessManager()
-    pm.StartWorkers(5)
+    pm.StartWorkers(2)
     db = DataBase()
     db.Connect()
 
@@ -24,8 +24,7 @@ if __name__ == "__main__":
         if upseries["up_name"] in csv_words or upseries["up_id"] in csv_words:
             upids.append(upseries["up_id"])
 
-    root = abspath(r"./.download/")
-    vids = []
+    datalist = []
     count = 0
     for upid in upids:
         videodf = get_allvideoinfo_byupid(db, upid)
@@ -37,16 +36,47 @@ if __name__ == "__main__":
                 continue
             if vseries["duration"] > 3600:  # 短视频
                 continue
-            downfold = os.path.join(root, upid)
+            downfold = os.path.join(download_root, upid)
             downfold = os.path.join(downfold, vseries["v_id"])
             downfold = downfold + "\\"
-            vids.append([vseries["v_id"], downfold, vseries["duration"]])
+            datalist.append([vseries["v_id"], downfold, vseries["duration"]])
             # pm.AddTask(download_video, *[vseries["v_id"], downfold, default_bili_cookie_ytdlp, 1])
     print()
-    random.shuffle(vids)
-    print(len(vids))
-    for v in vids:
+    random.shuffle(datalist)
+    print('视频总数', len(datalist))
+
+    dsum_yes = 0
+    dsum_no = 0
+    dsum_size_yes = 0
+    dsum_size_no = 0
+    for i, (v_id, downfold, duration) in enumerate(datalist):
+        print(f"\r{float((i+1) / len(datalist)) * 100:.2f}%", end="")
+        if os.path.exists(downfold) and scan_foldsize(downfold) > 0:
+            dsum_yes += duration
+            dsum_size_yes += scan_foldsize(downfold)
+        else:
+            dsum_no += duration
+    print()
+    dsum_size_no = int(dsum_size_yes * dsum_no / dsum_yes) if dsum_yes > 0 else 0
+    val1 = int(dsum_size_yes / dsum_yes) if dsum_yes > 0 else 0
+    print("根据已有的数据估算磁盘占用/时长s=", generate_size_string(val1))
+    print("已下载时长", generate_duration_string(dsum_yes))
+    print("未下载时长", generate_duration_string(dsum_no))
+    print("已下载大小", generate_size_string(dsum_size_yes))
+    print("未下载大小", generate_size_string(dsum_size_no))
+
+
+    size_count = 0
+    num_count = 0
+    for v in datalist:
+        if os.path.exists(v[1]) and scan_foldsize(v[1]) > 0:
+            continue
+        size_count += val1 * v[2]
+        num_count += 1
+        if size_count > 1024 ** 3: # 限制下载数量
+            break
         pm.AddTask(download_video, *[v[0], v[1], default_bili_cookie_ytdlp, 1])
-        # download_video(v[0], v[1], default_bili_cookie_ytdlp, 1)
+    # download_video(v[0], v[1], default_bili_cookie_ytdlp, 1)
+    print('已添加任务数', num_count)
     pm.WaitAll()
     db.Disconnect()

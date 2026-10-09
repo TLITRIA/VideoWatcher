@@ -87,7 +87,8 @@ def insert_up_null(db: DataBase, up_id: str, table: str = "up"):
 
 
 def insert_up(db: DataBase, df: pd.DataFrame, table: str = "up"):
-    """基于up_id向表中插入数据，会自动选择插入哪些字段，不插入哪些字段"""
+    """基于up_id向表中插入数据，会自动选择插入哪些字段，不插入哪些字段。
+    适用表：up ytbup"""
     if not db.isConnected:
         return False
     result = db.conn.execute(f"PRAGMA table_info({table})")
@@ -158,13 +159,13 @@ def insert_video(db: DataBase, df: pd.DataFrame, table: str = "video"):
     return True
 
 
-def insert_up_tag(db: DataBase, up_id: str, tag: str, table: str = "up_tag"):
+def insert_up_tag(db: DataBase, up_id: str, tag: str, table: str = "up_tag", uptable: str = "up"):
     """插入up_tag表"""
     if not db.isConnected or not up_id or not tag:
         return False
     sql = f"INSERT INTO {table}(up_id, tag) VALUES ('{up_id}', '{tag}');"
     db.ExecuteNow(sql)
-    update_up_tagtime(db, up_id, table)
+    update_up_tagtime(db, up_id, uptable)
     return True
 
 
@@ -206,6 +207,16 @@ def delete_up_tag(db: DataBase, up_id: str, tag: str, table: str = "up_tag"):
     update_up_tagtime(db, up_id, table)
     return True
 
+def rebuild_up_tags(db: DataBase, up_id: str, tags: list[str], table: str = "up_tag", uptable: str = "up"):
+    """重建up_tag表"""
+    if not db.isConnected or not up_id or not tags:
+        return False
+    sql = f"DELETE FROM {table} WHERE up_id='{up_id}';"
+    db.ExecuteNow(sql)
+    for tag in tags:
+        insert_up_tag(db, up_id, tag, table, uptable)
+    return True
+    
 
 def delete_video_tag(db: DataBase, video_id: str, tag: str):
     """删除video_tag表"""
@@ -366,12 +377,7 @@ def get_up_unfilled(db: DataBase) -> list:
     if not db.isConnected:
         return []
     # 定义什么样的数据是残缺的
-    sql = "SELECT up_id " \
-    "FROM up " \
-    "WHERE up_name IS NULL " \
-    "OR face IS NULL " \
-    "OR up_last_time IS NULL" \
-    ";"
+    sql = "SELECT up_id " "FROM up " "WHERE up_name IS NULL " "OR face IS NULL " "OR up_last_time IS NULL" ";"
     ret = [row[0] for row in db.conn.execute(sql).fetchall() if row[0] != ""]
     ret = sorted(list(set(ret)))
     return ret
@@ -382,7 +388,7 @@ def get_all_up_id(db: DataBase, table: str = "up") -> list:
     ret = []
     if not db.isConnected:
         return []
-    sql = f"SELECT up_id FROM {table};"  
+    sql = f"SELECT up_id FROM {table};"
     ret = [str(row[0]) for row in db.conn.execute(sql).fetchall() if row[0] != ""]
     return ret
 
@@ -470,7 +476,7 @@ def judge_bilibiliUP_needupdate(db: DataBase, up_id: str) -> int:
         or series["up_last_time"] is None
     ):
         return -1
-    if series["data_time"] and int(series["data_time"]) < get_timestamp() - 60 * 60 * 24:  # 24h未更新
+    if series["data_time"] and int(series["data_time"]) < get_timestamp() - 60 * 60 * 24 * 7:
         return 1
     if (
         series["up_sum"] and abs(int(series["up_sum"]) - len(get_allvideoinfo_byupid(db, series["up_id"]))) > 10

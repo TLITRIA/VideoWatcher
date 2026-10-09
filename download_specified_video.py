@@ -24,7 +24,6 @@ if __name__ == "__main__":
     # 筛选视频，创建下载记录
 
     # 下载视频
-    root = abspath(r"./.download/")
     count = 0
     for upid in upids:
         tmpdf = df[df["up_id"] == upid]
@@ -34,7 +33,7 @@ if __name__ == "__main__":
                 continue
             if int(series["isCharge"]) == 1:
                 continue
-            downfold = os.path.join(root, upid)
+            downfold = os.path.join(download_root, upid)
             downfold = os.path.join(downfold, series["v_id"])
             downfold = downfold + "\\"
             pm.AddTask(download_video, *[series["v_id"], downfold, default_bili_cookie_ytdlp, 1])

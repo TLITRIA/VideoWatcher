@@ -10,7 +10,6 @@ from Common.PyQt import *
 from Common.match_bili import *
 from DataAccess.sql_bilibili import *
 from Widget.InfoWidget import InfoWidget
-from Widget.ExcludeUpInfoWidget import ExcludeUpInfoWidget
 
 
 class DbWidget(QWidget, Ui_Form):
@@ -28,18 +27,6 @@ class DbWidget(QWidget, Ui_Form):
 
     def on_click_bili_up_exclude(self):
         self.FlowlayoutClear()
-
-        # df = get_all_up_exclude_df(self.db)
-        # for i in range(len(df)):
-        #     series = df.iloc[i]
-        #     if int(series["yes_no"]) == 0:
-        #         continue
-        #     w = ExcludeUpInfoWidget(self)
-        #     w.series_update_all(series)
-        #     w.setFixedSize(250, 110)
-        #     self.flow_layout.addWidget(w)
-        #     w.s_goto_upspace.connect(lambda url: self.wd.Goto(url))
-        #     w.s_mydel.connect(lambda w: w.MyDel() or self.removeFlowLayout(w))
         self.update_playlist_number()
         # 打开另一个控件
         self.__tablewidget = QTableWidget()
