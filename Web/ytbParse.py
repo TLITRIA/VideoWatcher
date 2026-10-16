@@ -13,7 +13,10 @@ def parse_ytb_latestvid(wd: MyWebDriver) -> str:
     latest_video_id = ""
     nodes = wd.xpath_wait(f"//ytd-rich-item-renderer")
     if len(nodes) != 0:
-        _nodes = xpath(nodes[0], "./div/yt-lockup-view-model/div/a[@class='ytLockupViewModelContentImage']")
+        _nodes = xpath(
+            nodes[0],
+            "./div/yt-lockup-view-model/div/a[@class='ytLockupViewModelContentImage']",
+        )
         if len(_nodes):
             latest_video_id = match_ytb_vid_byUrl(str(_nodes[0].get_attribute("href")))
     return latest_video_id
@@ -158,12 +161,16 @@ def parse_YtbVideos(wd: MyWebDriver, ytbtype: int = 1) -> pd.DataFrame:
     nodes = wd.xpath_wait("//ytd-rich-item-renderer")
     for i, node in enumerate(reversed(nodes)):
         print(
-            f"\r{wd._driver.current_url} 解析当前页的视频列表：{float((i+1) / len(nodes)) * 100:.2f}%", end="" if i + 1 != len(nodes) else "\n"
+            f"\r{wd._driver.current_url} 解析当前页的视频列表：{float((i+1) / len(nodes)) * 100:.2f}%",
+            end="" if i + 1 != len(nodes) else "\n",
         )
         info = []
         cols = []
         try:
-            _nodes = xpath(node, "./div/yt-lockup-view-model/div/a[@class='ytLockupViewModelContentImage']")
+            _nodes = xpath(
+                node,
+                "./div/yt-lockup-view-model/div/a[@class='ytLockupViewModelContentImage']",
+            )
             if len(_nodes):
                 v_id = match_ytb_vid_byUrl(str(_nodes[0].get_attribute("href")))
                 info.append(v_id)
@@ -247,13 +254,17 @@ def parse_YtbShorts(wd: MyWebDriver) -> pd.DataFrame:
     nodes = wd.xpath_wait("//ytd-rich-item-renderer")
     for i, node in enumerate(reversed(nodes)):
         print(
-            f"\r{wd._driver.current_url} 解析当前页的视频列表：{float((i+1) / len(nodes)) * 100:.2f}%", end="" if i + 1 != len(nodes) else "\n"
+            f"\r{wd._driver.current_url} 解析当前页的视频列表：{float((i+1) / len(nodes)) * 100:.2f}%",
+            end="" if i + 1 != len(nodes) else "\n",
         )
         info = []
         cols = []
         try:
 
-            _nodes = xpath(node, ".//a[@href and @class='shortsLockupViewModelHostEndpoint reel-item-endpoint']")
+            _nodes = xpath(
+                node,
+                ".//a[@href and @class='shortsLockupViewModelHostEndpoint reel-item-endpoint']",
+            )
             if len(_nodes):
                 url = str(_nodes[0].get_attribute("href"))
                 info.append(url)
@@ -279,7 +290,7 @@ def parse_YtbShorts(wd: MyWebDriver) -> pd.DataFrame:
                 play = parse_ytbPlaytimes(_nodes[1].text.split("次观看")[0])
                 info.append(play)
                 cols.append("play")
-                
+
             info.append(get_timestamp())
             cols.append("data_time")
 

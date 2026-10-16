@@ -207,7 +207,14 @@ def delete_up_tag(db: DataBase, up_id: str, tag: str, table: str = "up_tag"):
     update_up_tagtime(db, up_id, table)
     return True
 
-def rebuild_up_tags(db: DataBase, up_id: str, tags: list[str], table: str = "up_tag", uptable: str = "up"):
+
+def rebuild_up_tags(
+    db: DataBase,
+    up_id: str,
+    tags: list[str],
+    table: str = "up_tag",
+    uptable: str = "up",
+):
     """重建up_tag表"""
     if not db.isConnected or not up_id or not tags:
         return False
@@ -216,7 +223,7 @@ def rebuild_up_tags(db: DataBase, up_id: str, tags: list[str], table: str = "up_
     for tag in tags:
         insert_up_tag(db, up_id, tag, table, uptable)
     return True
-    
+
 
 def delete_video_tag(db: DataBase, video_id: str, tag: str):
     """删除video_tag表"""

@@ -53,6 +53,7 @@ def rebuild_bilibili(db_fp: str):
         task_bili_update_all(urls, db_fp, True)
     l.info(f"重建BiliBili数据库耗时{generate_duration_string(int(tb['elapsed']))}")
 
+
 def rebuild_youtube(db_fp: str):
     """重建youtube数据库"""
     l = Logger()
@@ -71,7 +72,7 @@ def rebuild_youtube(db_fp: str):
     l.info(f"筛选后的数据{len(up_ids)}条")
     urls = [f"https://www.youtube.com/@{x}/" for x in up_ids]
     random.shuffle(urls)
-    
+
     with timeblock("Youtube") as tb:
         l.info("开始重建Youtube数据库")
         task_update_ytb_database(urls, db_fp)
@@ -83,7 +84,7 @@ if __name__ == "__main__":
     pm.StartWorkers(2)
     l = Logger()
     l.info(logStart())
-    
+
     db = DataBase()
     db.Connect()
     create_all(db, default_create_sqls)

@@ -14,7 +14,11 @@ def ytb_scroll_to_bottom(wd: MyWebDriver):
 
 
 def ytb_download_video(
-    vid, downfold, limit_rate: int = 0, possible_title: str = "", cookie: str = default_ytb_cookie_ytdlp
+    vid,
+    downfold,
+    limit_rate: int = 0,
+    possible_title: str = "",
+    cookie: str = default_ytb_cookie_ytdlp,
 ) -> subprocess.CompletedProcess:
     if os.path.exists(downfold):
         if scan_foldsize(downfold) > 0:  # TODO 判断已下载的逻辑，需要更进一步的验证
@@ -32,10 +36,10 @@ def ytb_download_video(
     # cmd.extend(["--no-playlist"])
     # cmd.extend(["--limit-rate", f"{limit_rate}M"] if limit_rate > 0 else [])
     # cmd.extend(["--merge-output-format", "mp4"])
-    cmd.extend(["--extractor-args", 'youtube:player_client=tv,mweb'])
+    cmd.extend(["--extractor-args", "youtube:player_client=tv,mweb"])
     cmd.extend(["--cookies", cookie] if cookie != "" else [])
     # cmd.extend(['--cookies-from-browser', f'edge:{edge_profile_path}'])
-    
+
     cmd.append("-i")
     # cmd.extend(["--write-subs", "--write-auto-subs"])
     # cmd.extend(["--sub-langs", "en,zh-Hans,ai-zh,ai-en"])

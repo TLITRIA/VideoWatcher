@@ -43,7 +43,7 @@ if __name__ == "__main__":
             # pm.AddTask(download_video, *[vseries["v_id"], downfold, default_bili_cookie_ytdlp, 1])
     print()
     random.shuffle(datalist)
-    print('视频总数', len(datalist))
+    print("视频总数", len(datalist))
 
     dsum_yes = 0
     dsum_no = 0
@@ -65,7 +65,6 @@ if __name__ == "__main__":
     print("已下载大小", generate_size_string(dsum_size_yes))
     print("未下载大小", generate_size_string(dsum_size_no))
 
-
     size_count = 0
     num_count = 0
     for v in datalist:
@@ -73,10 +72,10 @@ if __name__ == "__main__":
             continue
         size_count += val1 * v[2]
         num_count += 1
-        if size_count > 1024 ** 3: # 限制下载数量
+        if size_count > 1024**3:  # 限制下载数量
             break
         pm.AddTask(download_video, *[v[0], v[1], default_bili_cookie_ytdlp, 1])
     # download_video(v[0], v[1], default_bili_cookie_ytdlp, 1)
-    print('已添加任务数', num_count)
+    print("已添加任务数", num_count)
     pm.WaitAll()
     db.Disconnect()

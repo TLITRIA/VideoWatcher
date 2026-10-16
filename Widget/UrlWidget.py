@@ -7,8 +7,10 @@ from PyQt6.QtCore import pyqtSignal
 
 class UrlWidget(QWidget, Ui_Form):
     s_goto = pyqtSignal(str)
+
     def on_clickGoto(self):
         self.s_goto.emit(self.label.text())
+
     def __init__(self, url, parent=None):
         super(UrlWidget, self).__init__(parent)
         self.setupUi(self)

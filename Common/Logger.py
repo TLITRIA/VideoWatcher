@@ -13,7 +13,7 @@ from Common.Abspath import default_log_fp
 @contextmanager
 def timeblock(label: str = ""):
     start = time.perf_counter()
-    result = {'elapsed':-1.0}
+    result = {"elapsed": -1.0}
     try:
         yield result
     finally:
@@ -118,6 +118,7 @@ def add_timestamp_to_filename(file_path: str) -> str:
     new_name = f"{p.stem}_{timestamp}{p.suffix}"
     return str(p.with_name(new_name))
 
+
 def generate_zip_filepath(file_path: str) -> str:
     """
     生成用于保存zip文件的路径。
@@ -128,13 +129,15 @@ def generate_zip_filepath(file_path: str) -> str:
     new_name = f"{p.stem}_{timestamp}.zip"
     return str(p.with_name(new_name))
 
-def create_zip(from_path: str, to_path: str)->bool:
+
+def create_zip(from_path: str, to_path: str) -> bool:
     """
     将单个文件压缩为zip文件。
     """
-    with zipfile.ZipFile(to_path, 'w', zipfile.ZIP_LZMA) as zipf:
+    with zipfile.ZipFile(to_path, "w", zipfile.ZIP_LZMA) as zipf:
         zipf.write(from_path, arcname=os.path.basename(from_path))
     return os.path.exists(to_path)
+
 
 def generate_duration_string(seconds: int) -> str:
     """
@@ -145,15 +148,16 @@ def generate_duration_string(seconds: int) -> str:
     seconds = seconds % 60
     return f"{hours}:{minutes:02}:{seconds:02}"
 
+
 def generate_size_string(bytes: int) -> str:
     """
     将字节转换为KB、MB、GB的字符串格式。
     """
     if bytes < 1024:
         return f"{bytes} B"
-    elif bytes < 1024 ** 2:
+    elif bytes < 1024**2:
         return f"{bytes / 1024:.2f} KB"
-    elif bytes < 1024 ** 3:
+    elif bytes < 1024**3:
         return f"{bytes / 1024 ** 2:.2f} MB"
     else:
         return f"{bytes / 1024 ** 3:.2f} GB"

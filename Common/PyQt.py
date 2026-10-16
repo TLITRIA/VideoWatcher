@@ -56,14 +56,15 @@ def register_webImg(label: QLabel, url: str):
     request = QNetworkRequest(QUrl(url))
     network_manager.get(request)
 
+
 class WheelBlocker(QObject):
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.Type.Wheel and isinstance(
-                obj, (QSpinBox, QDoubleSpinBox, QComboBox)):
+        if event.type() == QEvent.Type.Wheel and isinstance(obj, (QSpinBox, QDoubleSpinBox, QComboBox)):
             event.ignore()
             print("wheel event ignored")
-            return True   # 事件被拦截
+            return True  # 事件被拦截
         return super().eventFilter(obj, event)
+
 
 class SizeSyncFilter(QObject):
     def __init__(self, source, target, parent=None):

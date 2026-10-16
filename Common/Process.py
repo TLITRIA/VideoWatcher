@@ -62,9 +62,7 @@ class ProcessManager:
 
         self.num_workers = num_workers
         for _ in range(num_workers):
-            p = multiprocessing.Process(
-                target=worker, args=(self.task_queue, self.result_queue)
-            )
+            p = multiprocessing.Process(target=worker, args=(self.task_queue, self.result_queue))
             p.daemon = True
             p.start()
 

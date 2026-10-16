@@ -6,11 +6,12 @@ from Common.Logger import timeblock
 from Common.match_bili import *
 
 videoinfo_xpath = '//div[@class="bili-video-card__wrap"]'
-'''
+"""
 播放列表的爬取
 其他用户的播放列表与用户自己的播放列表不同，需要单独处理
 TODO 两种播放列表的处理应该合并，fold_name 在数据库自动选择值插入时不会冲突
-'''
+"""
+
 
 def parse_current_playlistPage(wd=None) -> pd.DataFrame:
     """
@@ -24,7 +25,7 @@ def parse_current_playlistPage(wd=None) -> pd.DataFrame:
     # print('-'*80)
     # with timeblock("step1 : wait"):
     tmp_count = 0
-    
+
     wd.xpath_wait('//a[@class="bili-cover-card"]')
     wd.xpath_wait('//div[@class="bili-video-card__text"]')
     wd.xpath_wait('//a[@class="bili-video-card__author"]')
@@ -39,7 +40,7 @@ def parse_current_playlistPage(wd=None) -> pd.DataFrame:
 
     # with timeblock("step2: fold_name"):
     fold_name = "默认收藏夹"
-    match = re.match(r".*fid=([0-9]*)&ftype=create", wd._driver.current_url) # TODO 取得用户id
+    match = re.match(r".*fid=([0-9]*)&ftype=create", wd._driver.current_url)  # TODO 取得用户id
     if match:
         fold_nodes = wd.xpath_findall(f'//div[@class="fav-sidebar-item" and @id="{match.group(1)}"]')
         if len(fold_nodes):

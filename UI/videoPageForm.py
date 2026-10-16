@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'E:\VideoWatcher\UI\videoPageForm.ui'
+# Form implementation generated from reading ui file 'D:\__Project__\VideoWatcher\UI\videoPageForm.ui'
 #
 # Created by: PyQt6 UI code generator 6.11.0
 #

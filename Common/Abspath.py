@@ -1,7 +1,7 @@
 import os, sys
 from os.path import abspath, dirname
 
-msedge_driver_path = R"F:\Env\edgedriver_win64\msedgedriver.exe"
+msedge_driver_path = R"D:\__Download__\Edge\edgedriver_win64\msedgedriver.exe"
 edge_profile_path = Rf"C:/Users/{os.getlogin()}/AppData/Local/Microsoft/Edge/User Data/Default"
 # test_db_fp = R"E:\VideoWatcher_bk\now\db\videowatcher.db"
 # download_root = abspath("./.cache/download/")

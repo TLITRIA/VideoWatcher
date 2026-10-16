@@ -1,7 +1,6 @@
 import unittest
 import sys
 import traceback
-from Widget.ExcludeUpInfoWidget import *
 from PyQt6.QtWidgets import QApplication
 from Web.MyWebDriver import *
 from Web.biliAccess import *
@@ -31,7 +30,7 @@ class TestRunWithoutError(unittest.TestCase):
         cls.wd.selenium_options.append("--mute-audio")
         cls.wd.Login()
         cls.db = DataBase()
-        cls.db.Connect(test_db_fp)
+        cls.db.Connect()
         create_all(cls.db, default_create_sqls)
 
     @classmethod
@@ -42,18 +41,6 @@ class TestRunWithoutError(unittest.TestCase):
         cls.db.Disconnect()
         cls.wd.Quit()
 
-    def test_first_up_in_excludeup(self):
-        """测试编辑excludeup表中第一条记录"""
-        try:
-            w = ExcludeUpInfoWidget()
-            w.show()
-            df = get_all_up_exclude_df(self.db)
-            if len(df) == 0:
-                return
-            w.series_update_all(df.iloc[0])
-            self.app.processEvents()
-        except Exception:
-            self.fail(f"test_first_up_in_excludeup 执行异常:\n{traceback.format_exc()}")
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

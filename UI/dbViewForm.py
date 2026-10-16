@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'E:\VideoWatcher\UI\dbViewForm.ui'
+# Form implementation generated from reading ui file 'D:\__Project__\VideoWatcher\UI\dbViewForm.ui'
 #
 # Created by: PyQt6 UI code generator 6.11.0
 #

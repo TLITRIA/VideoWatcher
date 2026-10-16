@@ -30,6 +30,7 @@ def match_ytb_streams(url: str) -> str:
     else:
         return ""
 
+
 def match_ytb_shorts(url: str) -> str:
     """匹配youtube shorts发布页"""
     match = re.match(r"https://www.youtube.com/@([^/]*)/shorts", url)
@@ -47,6 +48,7 @@ def match_ytb_vid_byUrl(url: str) -> str:
     else:
         return ""
 
+
 def match_ytb_vid_byShortUrl(html: str) -> str:
     """匹配youtube短视频id"""
     match = re.search(r"https://www.youtube.com/shorts/([^&]*)", html)
@@ -54,6 +56,7 @@ def match_ytb_vid_byShortUrl(html: str) -> str:
         return match.group(1)
     else:
         return ""
+
 
 def parse_ytbUploadStamp(stamp: str) -> int:
     """解析youtube发布时间戳"""

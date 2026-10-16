@@ -24,7 +24,11 @@ def set_upexclude_url(db: DataBase):
                 print(f"已处理 {i} 条数据, 预计剩余时间: {resttime:.2f}s")
             df.loc[i, "url"] = f"https://space.bilibili.com/{df.loc[i, 'up_id']}/upload/video"
             update_one_up_exclude(
-                db, str(df.loc[i, "up_id"]), str(df.loc[i, "reason"]), bool(df.loc[i, "yes_no"]), str(df.loc[i, "url"])
+                db,
+                str(df.loc[i, "up_id"]),
+                str(df.loc[i, "reason"]),
+                bool(df.loc[i, "yes_no"]),
+                str(df.loc[i, "url"]),
             )
         print(df[["up_id", "url"]])
 

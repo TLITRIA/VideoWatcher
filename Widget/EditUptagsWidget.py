@@ -100,7 +100,13 @@ class EditUptagsWidget(QWidget, Ui_Form):
         self.__tags_unselected = set()
         self.__uptable = ""
         self.__uptagtable = ""
-        self.columns = ["up_id", "up_name", "up_sum", "url", "taglist"]  # 修改列名只要修改这里
+        self.columns = [
+            "up_id",
+            "up_name",
+            "up_sum",
+            "url",
+            "taglist",
+        ]  # 修改列名只要修改这里
         self.isblock = 0
 
         self.tableWidget.setEditTriggers(

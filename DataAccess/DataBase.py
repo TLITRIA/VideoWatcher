@@ -7,6 +7,7 @@ from Common.Common import *
 from Common.Abspath import default_db_fp
 from sqlalchemy import create_engine
 
+
 @singleton
 class DataBase:
     isConnected = False
@@ -59,15 +60,12 @@ class DataBase:
             return pd.read_sql(f"SELECT * FROM {table_name}", self.conn)
 
 
-
 def df2sqlite_replace(df: pd.DataFrame, sqlite_fp: str, sheetname: str = "untitled"):
     sqlite_engine = create_engine("sqlite:///" + sqlite_fp)
     df.to_sql(sheetname, con=sqlite_engine, if_exists="replace", index=False)
 
 
-def df2sqlite_update(
-    df: pd.DataFrame, sqlite_fp: str, drop_tags=[], sheetname: str = "untitled"
-):
+def df2sqlite_update(df: pd.DataFrame, sqlite_fp: str, drop_tags=[], sheetname: str = "untitled"):
     existed_df = sqlite2df(sqlite_fp, f"SELECT * FROM {sheetname};")
     if existed_df.shape[0]:
         df = pd.concat([existed_df, df], ignore_index=True)

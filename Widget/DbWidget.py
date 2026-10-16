@@ -86,6 +86,7 @@ class DbWidget(QWidget, Ui_Form):
             print(f"删除up_id: {up_id}")
             delete_up(self.db, up_id, "up_exclude")
             self.__tablewidget.removeRow(row)
+
         ks_del = QShortcut(QKeySequence("Delete"), self.__tablewidget)
         ks_del.setContext(Qt.ShortcutContext.WidgetShortcut)
         ks_del.activated.connect(lambda: on_cell_delete(self))
