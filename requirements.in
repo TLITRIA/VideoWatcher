@@ -1,0 +1,23 @@
+netscape-cookies # 爬虫
+selenium # 爬虫
+pandas # 数据处理
+matplotlib # 可视化
+numpy # 机器学习
+black # 代码格式化
+sqlalchemy # 数据库
+
+# PyQt6 及其相关依赖
+PyQt6 
+PySide6 # GUI 提供pysider6-designer.exe
+
+# yt-dlp 及其相关依赖
+yt-dlp
+curl_cffi
+deno
+bgutil-ytdlp-pot-provider
+riplet
+
+ipdb # 调试
+pyinstaller # 打包
+# 参考资料
+# https://blog.csdn.net/Dontla/article/details/151157745

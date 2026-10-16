@@ -19,7 +19,7 @@ def timeblock(label: str = ""):
     finally:
         end = time.perf_counter()
         result["elapsed"] = end - start
-        print(f"{label} 耗时：{result["elapsed"]:.6f} s")
+        print(f"{label} 耗时：{result['elapsed']:.6f} s")
         # TODO 记录label/代码位置/运行频率/平均耗时，形成表格记录
 
 

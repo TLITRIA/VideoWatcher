@@ -79,7 +79,7 @@ def parse_YtbUp(wd: MyWebDriver, db: DataBase, other: list = []):
             cols.append("face")
         nodes = wd.xpath_wait("//div/span/span[@class and @dir='auto']")
         if len(nodes):
-            up_sum = nodes[1].text.strip().split(" ")[0]
+            up_sum = nodes[-1].text.strip().split(" ")[0]
             info.append(up_sum)
             cols.append("up_sum")
 

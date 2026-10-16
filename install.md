@@ -1,4 +1,5 @@
 # 环境配置
+uv pip compile requirements.in --python-version 3.14 --output-file requirements.txt --upgrade
 uv venv --python 3.14
 uv pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple --system-certs
 下载浏览器当前版本对应的webdriver.exe并在Abspath.py中登记

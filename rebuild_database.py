@@ -42,7 +42,7 @@ def rebuild_bilibili(db_fp: str):
             c2 += 1
         if ret == 3:
             c3 += 1
-    l.info(f"筛选后的数据{len(up_ids)}条")
+    l.info(f"bilibili - 筛选后的数据{len(up_ids)}条")
     l.info(f"up数据已过期的有{c1}条")
     l.info(f"视频与数据库中相差过大的有{c2}条")
     l.info(f"最新的视频不在数据库中的有{c3}条")
@@ -69,7 +69,7 @@ def rebuild_youtube(db_fp: str):
     for i in range(len(df)):
         if judge_ytbUp_needupdate(db, str(df.loc[i, "up_id"])):
             up_ids.append(str(df.loc[i, "up_id"]))
-    l.info(f"筛选后的数据{len(up_ids)}条")
+    l.info(f"ytb - 筛选后的数据{len(up_ids)}条")
     urls = [f"https://www.youtube.com/@{x}/" for x in up_ids]
     random.shuffle(urls)
 
@@ -97,8 +97,9 @@ if __name__ == "__main__":
         create_zip(default_db_fp, bkpath)
         l.info(f"备份完成，备份文件为{bkpath}")
     # 重建
-    pm.AddTask(rebuild_bilibili, *[default_db_fp])
-    pm.AddTask(rebuild_youtube, *[default_db_fp])
+    # pm.AddTask(rebuild_bilibili, *[default_db_fp])
+    # pm.AddTask(rebuild_youtube, *[default_db_fp])
+    rebuild_youtube(default_db_fp)
     # ==================================== #
     pm.WaitAll()
     db.Disconnect()
