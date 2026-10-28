@@ -29,15 +29,15 @@ def ytb_download_video(
 
     cmd = ["yt-dlp"]
     cmd.extend(["-vU"])  # 调试信息
-    cmd.extend(["--impersonate", "edge"])  # curl_cffi
+    # cmd.extend(["--impersonate", "edge"])  # curl_cffi
     # cmd.extend(["--socket-timeout", "60"])
     # cmd.extend(["-f", "bestvideo+bestaudio"])
     cmd.extend(["-o", f"{downfold}%(title)s.%(ext)s"])
     # cmd.extend(["--no-playlist"])
     # cmd.extend(["--limit-rate", f"{limit_rate}M"] if limit_rate > 0 else [])
     # cmd.extend(["--merge-output-format", "mp4"])
-    cmd.extend(["--extractor-args", "youtube:player_client=tv,mweb"])
-    cmd.extend(["--cookies", cookie] if cookie != "" else [])
+    # cmd.extend(["--extractor-args", "youtube:player_client=tv,mweb"])
+    # cmd.extend(["--cookies", cookie] if cookie != "" else [])
     # cmd.extend(['--cookies-from-browser', f'edge:{edge_profile_path}'])
 
     cmd.append("-i")
