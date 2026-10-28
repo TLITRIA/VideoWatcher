@@ -79,9 +79,12 @@ def parse_YtbUp(wd: MyWebDriver, db: DataBase, other: list = []):
             cols.append("face")
         nodes = wd.xpath_wait("//div/span/span[@class and @dir='auto']")
         if len(nodes):
-            up_sum = nodes[-1].text.strip().split(" ")[0]
-            info.append(up_sum)
-            cols.append("up_sum")
+            for node in nodes:
+                if "个视频" in node.text:
+                    up_sum = node.text.strip().split(" ")[0]
+                    info.append(up_sum)
+                    cols.append("up_sum")
+                    break
 
         data_time = get_timestamp()
         info.append(data_time)
@@ -319,6 +322,7 @@ def task_update_ytb_database(urls: list, db_fp: str, ytb_types: list = ["视频"
     wd.selenium_options.append("--mute-audio")
     wd._generate_driver()
     # wd._driver.set_page_load_timeout(60)
+    wd.setWindowHalfScreen(ifLeft=False)
     l = Logger()
     for index, url in enumerate(urls):
         print("\n\n" + "=" * 80 + "\n")
