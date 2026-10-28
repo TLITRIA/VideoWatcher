@@ -1,6 +1,7 @@
 from DataAccess.DataBase import *
 from os.path import abspath
 import traceback
+、from enum import Enum
 from Common.Logger import *
 from PyQt6.QtCore import Qt
 
@@ -469,26 +470,48 @@ def get_allvideoinfo_byupid(db: DataBase, up_id: str, table: str = "video") -> p
     return df
 
 
-def judge_bilibiliUP_needupdate(db: DataBase, up_id: str) -> int:
+class BiliEnum(Enum):
+    """
+    < 0 有问题但不需要更新
+    = 0 没问题也不需要更新
+    > 0 需要更新
+    """
+
+    DoNothing = -1
+    NoNeedToUpdate = 0  # 不需要更新
+    UpNeedDeleteALL = 1  # 删除up的所有视频并更新
+    UpMissInfo = 2  # up信息缺失
+    UpLongTimeNoUpdate = 3  # up长时间未更新
+    UpVideoSumTooSmall = 4  # up的视频数太少
+    UpLastVidNotInDB = 5  # up的最新视频不在数据库中
+
+
+def judge_bilibiliUP_needupdate(db: DataBase, up_id: str) -> tuple[str, Enum]:
     df = get_up_info(db, up_id)
     if len(df) != 1:
-        return -1
+        return f"{up_id} doesn't exist in database", BiliEnum.DoNothing  # up不存在
     series = df.iloc[0]
     if (
         series["up_sum"] is None
         or series["up_name"] is None
         or series["intro"] is None
-        or series["face"] is None
+        # or series["face"] is None
         or series["up_last_vid"] is None
         or series["up_last_time"] is None
     ):
-        return -1
-    if series["data_time"] and int(series["data_time"]) < get_timestamp() - 60 * 60 * 24 * 7:
-        return 1
-    if (
-        series["up_sum"] and abs(int(series["up_sum"]) - len(get_allvideoinfo_byupid(db, series["up_id"]))) > 10
-    ):  # 总数与数据库相差过大
-        return 2
+        return f"{up_id} miss info", BiliEnum.UpMissInfo
+    timeout = 60 * 60 * 24 * 7
+    timeout_string = generate_duration_string(timeout)
+    if series["data_time"] and int(series["data_time"]) < get_timestamp() - timeout:
+        return f"{up_id} didn't update for at least {timeout_string}", BiliEnum.UpLongTimeNoUpdate
+    offset = 10
+    sumExist = len(get_allvideoinfo_byupid(db, series["up_id"]))
+    if series["up_sum"]:  # 总数与数据库相差过大
+        if int(series["up_sum"]) - sumExist > offset:
+            return f"{up_id} sumExist is at least {offset} less than up_sum", BiliEnum.UpVideoSumTooSmall
+        elif int(series["up_sum"]) < sumExist:
+            return f"{up_id} need delete all video then update", BiliEnum.DoNothing  # BiliEnum.UpNeedDeleteALL
+        # TODO 有个视频为8484的up主反复触发这一条，搞清楚前不处理
     if len(get_video_info(db, str(series["up_last_vid"]), "video")) == 0:  # 最新视频不在数据库中
-        return 3
-    return 0
+        return f"{up_id} last vid not in database", BiliEnum.UpLastVidNotInDB
+    return "", BiliEnum.NoNeedToUpdate

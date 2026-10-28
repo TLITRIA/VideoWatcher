@@ -282,7 +282,8 @@ def task_bili_update_all(urls: list, db_fp: str, update_videos: bool = False):
     wd.selenium_options.append("--force-dark-mode")
     wd.selenium_options.append("--mute-audio")
     wd.Login()
-    wd._driver.minimize_window()
+    wd.setWindowHalfScreen()
+
     l = Logger()
     for index, url in enumerate(urls):
         print("\n\n" + "=" * 80 + "\n")
@@ -304,10 +305,10 @@ def task_bili_update_all(urls: list, db_fp: str, update_videos: bool = False):
             l.info(f"爬取后视频总数为：\t{len(get_allvideoinfo_byupid(db, up_id))}")
 
         for i in range(3):  # TODO magic number
-            ret = judge_bilibiliUP_needupdate(db, up_id)
-            if ret == 0:
+            ret, enum = judge_bilibiliUP_needupdate(db, up_id)
+            if enum.value <= 0:
                 break
-            l.info(f"up主 {url} 的视频重新爬取, 状况为：{ret}")
+            l.info(f"up主 {url} 的视频重新爬取, 状况为：{enum.name}")
             # delete_allvideo_byupid(db, up_id)
             wd._driver.refresh()  # 刷新以前往分页第一页
             time.sleep(3)

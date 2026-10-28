@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS ytbup_tag(
 CREATE TABLE IF NOT EXISTS ytbvideo( 
     v_id TEXT, -- 视频id
     up_id TEXT, -- up主id
-    ytbtype INT, -- 类型：0 其他/默认 1 视频 2 直播
+    ytbtype INT, -- 类型：0 其他/默认 1 视频 2 直播 3 短视频
     title TEXT, -- 视频标题
     url TEXT, -- 前往视频页
     cover TEXT, -- 视频封面链接
@@ -111,6 +111,20 @@ def ytb_get_up_unfilled(db: DataBase) -> list:
     return ret
 
 
+def ytb_up_is_unfilled(series: pd.Series) -> bool:
+    return (
+        series["up_name"] is None
+        or series["intro"] is None
+        # or series["face"] is None
+        or series["data_time"] is None
+        or series["latest_video_id"] is None
+        or series["latest_stream_id"] is None
+        or series["latest_short_id"] is None
+        or series["up_sum"] is None
+        or series["last_update_video_time"] is None
+    )
+
+
 def ytb_get_allvideoinfo_byupid(db: DataBase, up_id: str) -> pd.DataFrame:
     return get_allvideoinfo_byupid(db, up_id, "ytbvideo")
 
@@ -123,29 +137,55 @@ def ytb_get_oldestvideoinfo_byupid(db: DataBase, up_id: str) -> pd.DataFrame:
     return df
 
 
-def judge_ytbUp_needupdate(db: DataBase, up_id: str) -> bool:
+class YtbEnum(Enum):
+    """
+    < 0 有问题但不需要更新
+    = 0 没问题也不需要更新
+    > 0 需要更新
+    """
+
+    DoNothing = -1  # 有问题但不需要更新
+    NoNeedToUpdate = 0  # 不需要更新
+
+    UpNeedDeleteALL = 1  # 需要删除up的所有视频并更新
+    UpMissInfo = 2  # up信息缺失
+    UpLongTimeNoUpdate = 3  # up长时间未更新
+    UpVideoSumTooSmall = 4  # up的视频数太少
+    UpLastVidNotInDB = 5  # up的最新不在数据库中
+    UpLastVideoNotInDB = 6  # up的最新视频不在数据库中
+    UpLastShortNotInDB = 7  # up的最新短视频不在数据库中
+    UpLastStreamNotInDB = 8  # up的最新直播回放不在数据库中
+
+
+def judge_ytbUp_needupdate(db: DataBase, up_id: str) -> tuple[str, Enum]:
     updf = ytb_get_up_info(db, up_id)
     if len(updf) != 1:
-        return False  # 查无此人不处理
+        return f"{up_id} doesn't exist in database", YtbEnum.DoNothing
     series = updf.iloc[0]
-    if series["up_id"] in ytb_get_up_unfilled(db):
-        return True
-    if not series["data_time"] or int(series["data_time"]) < get_timestamp() - 60 * 60 * 24 * 7:  # up信息未更新
-        return True
+    if ytb_up_is_unfilled(series):
+        return f"{up_id} miss info", YtbEnum.UpMissInfo
+    timeout = 60 * 60 * 24 * 7
+    timeout_string = generate_duration_string(timeout)
+    if not series["data_time"] or int(series["data_time"]) < get_timestamp() - timeout:  # up信息未更新
+        return f"{up_id} didn't update for at least {timeout_string}", YtbEnum.UpLongTimeNoUpdate
     if (
-        not series["last_update_video_time"]
-        or int(series["last_update_video_time"]) < get_timestamp() - 60 * 60 * 24 * 7
+        not series["last_update_video_time"] or int(series["last_update_video_time"]) < get_timestamp() - timeout
     ):  # up视频信息未更新
-        return True
+        return f"{up_id}'s video didn't update for at least {timeout_string}", YtbEnum.UpLongTimeNoUpdate
     videodf = ytb_get_allvideoinfo_byupid(db, up_id)
     if videodf.empty:
-        return True
+        return f"{up_id} has no video", YtbEnum.UpVideoSumTooSmall
     if series["latest_video_id"] and (not videodf["v_id"].isin([series["latest_video_id"]]).any()):
-        return True  # 最新视频id不在ytbvideo表中
+        return f"{up_id} last video not in database", YtbEnum.UpLastVideoNotInDB
     if series["latest_stream_id"] and (not videodf["v_id"].isin([series["latest_stream_id"]]).any()):
-        return True  # 最新直播id不在ytbvideo表中
+        return f"{up_id} last stream not in database", YtbEnum.UpLastStreamNotInDB
     if series["latest_short_id"] and (not videodf["v_id"].isin([series["latest_short_id"]]).any()):
-        return True  # 最新短片id不在ytbvideo表中
-    if series["up_sum"] and int(series["up_sum"]) - len(videodf) > 10:  # 视频数量少于up_sum
-        return True
-    return False
+        return f"{up_id} last short not in database", YtbEnum.UpLastShortNotInDB
+    offset = 10
+    sumExist = len(videodf)
+    if series["up_sum"]:
+        if int(series["up_sum"]) - sumExist > offset:  # 视频数量少于up_sum
+            return f"{up_id} sumExist is at least {offset} less than up_sum", YtbEnum.UpVideoSumTooSmall
+        # elif int(series["up_sum"]) < sumExist:
+        #     return f"{up_id} need delete all video then update", YtbEnum.UpNeedDeleteALL
+    return "", YtbEnum.NoNeedToUpdate
