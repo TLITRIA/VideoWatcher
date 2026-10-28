@@ -71,6 +71,8 @@ def parse_upload_timestamp(
         return get_timestamp_bydate(year, int(match.group(1)), int(match.group(2)))
     if upload_string == "昨天":
         return get_timestamp_bydate(year, month, day) - 24 * 60 * 60
+    if upload_string == "刚刚":
+        return get_timestamp()
     if ret == -1:
         print("-" * 80)
         print(upload_string)
