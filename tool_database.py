@@ -98,3 +98,68 @@ def insert_youtube():
             insert_up_null(db, unquote(row[0]), "ytbup")
             print(unquote(row[0]))
     db.Disconnect()
+
+
+from Common.match_ytb import match_ytb_vid_byUrl
+from Web.ytbAccess import ytb_download_video
+
+
+def get_ytb_urls():
+    upincludecsv = abspath("./.cache/tmp.csv")
+    vidcsv = abspath("./.cache/urls.csv")
+    db = DataBase()
+    if db.isConnected:
+        db.Disconnect()
+    db.Connect()
+    df = get_whole_table(db, "ytbvideo")
+    upids = []
+    with open(upincludecsv, "r", encoding="utf-8") as f:
+        csv_r = csv.reader(f)
+        for row in csv_r:
+            upids.append(row[0])
+    print("-" * 80)
+    print("筛选前:\t\t\t", df.shape)
+
+    df = df[df["up_id"].isin(upids)]  # upid包含在tmp.csv中的
+    print(
+        f"tmp.csv筛选upid后:\t {df.shape}",
+    )
+
+    df = df[df["ytbtype"] != 3]  # short视频
+    print("short视频筛选后:\t", df.shape)
+
+    df = df[df["isCharge"] == 0]  # 免费视频
+    print("免费视频筛选后:\t\t", df.shape)
+
+    df = df[df["duration"] > 60 * 20]  # x分钟以内
+    print("时长太短筛选后:\t\t", df.shape)
+
+    df = df[df["duration"] < 60 * 60 * 3]  # x小时以内
+    print("时长太长筛选后:\t\t", df.shape)
+
+    db.Disconnect()
+
+    with open(vidcsv, "w", encoding="utf-8") as f:
+        for url in df["url"].values:
+            f.write(match_ytb_vid_byUrl(url) + "\n")
+
+
+def download_ytb_videos():
+    vidcsv = abspath("./.cache/urls.csv")
+
+    vids = []
+    with open(vidcsv, "r", encoding="utf-8") as f:
+        for url in f.readlines():
+            vids.append(url.strip())
+
+    for vid in vids:
+        ytb_download_video(
+            vid,
+            abspath(R"./.cache/downloadtest/") + "/",
+            cookie=default_ytb_cookieeditor_ytdlp,
+        )
+
+
+if __name__ == "__main__":
+    # get_ytb_urls()
+    download_ytb_videos()
