@@ -29,7 +29,7 @@ if __name__ == "__main__":
     entry = EntryWidget()
     entry.show()
     entry.but_bili_default_fold.click()
-    # entry.but_dbview.click()
+    # entry.but_edit_ytb_up.click()
     # entry.but_ytb_rebuild.click()
 
     app.exec()

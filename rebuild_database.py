@@ -17,7 +17,7 @@ from DataAccess.sql_bilibili import *
 from DataAccess.sql_ytb import *
 
 
-def rebuild_bilibili(db_fp: str):
+def task_rebuild_bilibili(db_fp: str):
     """重建bilibili数据库"""
     l = Logger()
     db = DataBase()
@@ -29,32 +29,30 @@ def rebuild_bilibili(db_fp: str):
     df = get_whole_table(db, "up")
     df = df.sort_values(by="data_time")
     l.info(f"bilibili原数据{len(df)}条")
-    c1 = 0
-    c2 = 0
-    c3 = 0
+    results: dict = {}
     for i in range(len(df)):
-        ret = judge_bilibiliUP_needupdate(db, str(df.loc[i, "up_id"]))
-        if ret != 0:
-            up_ids.append(str(df.loc[i, "up_id"]))
-        if ret == 1:
-            c1 += 1
-        if ret == 2:
-            c2 += 1
-        if ret == 3:
-            c3 += 1
+        up_id = str(df.loc[i, "up_id"])
+        ret, enum = judge_bilibiliUP_needupdate(db, up_id)
+        results[enum.name] = results.get(enum.name, 0) + 1
+        if enum.value > 0:
+            up_ids.append(up_id)
+        if enum == BiliEnum.UpNeedDeleteALL:
+            delete_up(db, up_id)
     l.info(f"bilibili - 筛选后的数据{len(up_ids)}条")
-    l.info(f"up数据已过期的有{c1}条")
-    l.info(f"视频与数据库中相差过大的有{c2}条")
-    l.info(f"最新的视频不在数据库中的有{c3}条")
+    l.info(f"bilibili数据库统计：{str(results)}")
     urls = [f"https://space.bilibili.com/{x}/upload/video" for x in up_ids]
     random.shuffle(urls)
     with timeblock("BiliBili") as tb:
         l.info("开始重建BiliBili数据库")
-        task_bili_update_all(urls, db_fp, True)
+        try:
+            task_bili_update_all(urls, db_fp, True)
+        finally:
+            db.Disconnect()
+            MyWebDriver().Quit()
     l.info(f"重建BiliBili数据库耗时{generate_duration_string(int(tb['elapsed']))}")
 
 
-def rebuild_youtube(db_fp: str):
+def task_rebuild_youtube(db_fp: str):
     """重建youtube数据库"""
     l = Logger()
     db = DataBase()
@@ -66,16 +64,25 @@ def rebuild_youtube(db_fp: str):
     df = get_whole_table(db, "ytbup")
     df = df.sort_values(by="data_time")
     l.info(f"youtube原数据{len(df)}条")
+    results: dict = {}
     for i in range(len(df)):
-        if judge_ytbUp_needupdate(db, str(df.loc[i, "up_id"])):
-            up_ids.append(str(df.loc[i, "up_id"]))
+        up_id = str(df.loc[i, "up_id"])
+        ret, enum = judge_ytbUp_needupdate(db, up_id)
+        results[enum.name] = results.get(enum.name, 0) + 1
+        if enum.value > 0:
+            up_ids.append(up_id)
     l.info(f"ytb - 筛选后的数据{len(up_ids)}条")
+    l.info(f"ytb数据库统计：{str(results)}")
     urls = [f"https://www.youtube.com/@{x}/" for x in up_ids]
     random.shuffle(urls)
 
     with timeblock("Youtube") as tb:
         l.info("开始重建Youtube数据库")
-        task_update_ytb_database(urls, db_fp)
+        try:
+            task_update_ytb_database(urls, db_fp)
+        finally:
+            db.Disconnect()
+            MyWebDriver().Quit()
     l.info(f"重建Youtube数据库耗时{generate_duration_string(int(tb['elapsed']))}")
 
 
@@ -97,9 +104,8 @@ if __name__ == "__main__":
         create_zip(default_db_fp, bkpath)
         l.info(f"备份完成，备份文件为{bkpath}")
     # 重建
-    # pm.AddTask(rebuild_bilibili, *[default_db_fp])
-    # pm.AddTask(rebuild_youtube, *[default_db_fp])
-    rebuild_youtube(default_db_fp)
+    pm.AddTask(task_rebuild_bilibili, *[default_db_fp])
+    pm.AddTask(task_rebuild_youtube, *[default_db_fp])
     # ==================================== #
     pm.WaitAll()
     db.Disconnect()

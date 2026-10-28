@@ -3,6 +3,7 @@ from typing import Callable
 import pandas
 from pprint import pprint
 from netscape_cookies.netscape_cookies import save_cookies_to_file
+from PIL import ImageGrab
 
 from selenium.webdriver import Edge
 from selenium.webdriver.common.by import By
@@ -203,6 +204,14 @@ class MyWebDriver:
         if self._isQuit or not hasattr(self, "_driver") or self._driver is None:
             return
         self._driver.execute_script("document.title = arguments[0];", plainText)
+
+    def setWindowHalfScreen(self, ifLeft: bool = True):
+        if self._isQuit or not hasattr(self, "_driver") or self._driver is None:
+            return
+        screen = ImageGrab.grab()
+        screen_width, screen_height = screen.size
+        half_width = screen_width // 2
+        self._driver.set_window_rect(x=0 if ifLeft else half_width, y=0, width=half_width, height=screen_height)
 
 
 def xpath(node: WebElement, xp: str):
