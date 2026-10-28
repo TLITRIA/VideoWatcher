@@ -36,11 +36,38 @@ from DataAccess.sql_ytb import *
 
 def task_clean_database():
     db = DataBase()
+    l = Logger()
 
     db.Connect()
-    print("删除up_exclude表中yes_no为0的记录")
+
+    # l.info("检查数据是否符合规范")
+
+    l.info("删除up_exclude表中yes_no为0的记录")
     sql = "DELETE FROM up_exclude WHERE yes_no = 0;"
     db.ExecuteNow(sql)
+
+    l.info("BiliBili统计需要更新的数据")
+    df = get_whole_table(db, "up")
+    df = df.sort_values(by="data_time")
+    results: dict = {}
+    for i in range(len(df)):
+        ret, enum = judge_bilibiliUP_needupdate(db, str(df.loc[i, "up_id"]))
+        results[enum.name] = results.get(enum.name, 0) + 1
+        if enum.value > 0:
+            print(enum.name, "\t", ret)
+    l.info(f"BiliBili数据统计：{str(results)}")
+
+    l.info("Ytb统计需要更新的数据")
+    df = get_whole_table(db, "ytbup")
+    df = df.sort_values(by="data_time")
+    results: dict = {}
+    for i in range(len(df)):
+        up_id = str(df.loc[i, "up_id"])
+        ret, enum = judge_ytbUp_needupdate(db, up_id)
+        results[enum.name] = results.get(enum.name, 0) + 1
+        if enum.value > 0:
+            print(enum.name, "\t", ret)
+    l.info(f"Ytb数据统计：{str(results)}")
 
     db.Disconnect()
 
@@ -50,7 +77,8 @@ def task_clean_project_file(): ...
 
 def task_black_format_py_file():
     """格式化所有py文件"""
-    print("格式化所有py文件")
+    l = Logger()
+    l.info("Black格式化所有用户创建的xxx.py文件")
     project_root = abspath(R"./")
     dir_blacklists = [
         abspath(R"./.venv/"),
@@ -65,11 +93,15 @@ def task_black_format_py_file():
                 file_path = os.path.join(root, file)
                 if root in dir_blacklists or any(name in root for name in dir_blacklists + name_blacklists):
                     continue
-                print("=" * 80)
-                print(f"Black format file: {file_path}")
-                result = subprocess.run(["black", file_path, "-l", "120"], capture_output=True, text=True)
+                l.info(f"Black format file: {file_path}")
+                result = subprocess.run(
+                    ["black", file_path, "-l", "120"],
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                )
 
 
-if __name__ == "__main__":
-    task_clean_database()
-    task_black_format_py_file()
+task_clean_database()
+task_black_format_py_file()
